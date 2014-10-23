@@ -1,40 +1,50 @@
-/* uart hw definition
- *
+/*
+ * PSR bits
  */
-#define IO_BASE			0xfe000000                 // VA of IO 
-#define IO_SIZE			0x00800000                 // How much?
-#define IO_START		0xff000000                 // PA of IO
+#define SVC_MODE	0x00000013
+#define PSR_F_BIT	0x00000040
+#define PSR_I_BIT	0x00000080
 
-#define GOLDFISH_TTY_BASE       (0x2000)
-#define GOLDFISH_TTY_PUT_CHAR_PHYS (IO_START + GOLDFISH_TTY_BASE)
-#define GOLDFISH_TTY_PUT_CHAR_BASE (IO_BASE + GOLDFISH_TTY_BASE)
+#include "gos_serial_hw.inc"
 
-/* Print Rountine. */
-	.macro	addruart, rp, rv, rtmp
-	ldr		\rp, =GOLDFISH_TTY_PUT_CHAR_PHYS
-	ldr		\rv, =GOLDFISH_TTY_PUT_CHAR_BASE
-	.endm
-
-	.macro	senduart,rd,rx
-	teq	\rx, #0
-	strne	\rd, [\rx]
-	.endm
-
-	.macro	waituart,rd,rx
-	.endm
-
-	.macro	busyuart,rd,rx
-	.endm
-
-	.macro	setmode, mode, reg
+.macro	setmode, mode, reg
 	msr	cpsr_c, #\mode
-	.endm
+.endm
 
-	.macro	addruart_current, rx, tmp1, tmp2
+.macro	addruart_current, rx, tmp1, tmp2
 	addruart	\rx, \tmp1
-	.endm
+.endm
 
-.data
+main:
+	setmode	PSR_F_BIT | PSR_I_BIT | SVC_MODE, r9 @ ensure svc mode
+						@ and irqs disabled
+	mrc	p15, 0, r9, c0, c0		@ get processor id
+
+	mov	r4, #OS_Maintainer
+
+	mov	r5, #(_str_end - _str_start)
+	mov	r6, #0
+
+loop:
+	ldrb	r0, [r4]
+	bl	printch 
+	add	r6, r6, #1
+	cmp	r6, r5
+	beq	out
+	add	r4, r4, #1
+	b	loop
+out:
+
+	mov	r0, #'\n'
+	bl	printch 
+
+	mov	sp, #0x4000
+	bl	os_main
+
+finished:
+	mov	r0, r0
+	b	finished
+
 .global printascii
 printascii:
 		addruart_current r3, r1, r2
@@ -57,46 +67,6 @@ printch:
 		mov	r1, r0
 		mov	r0, #0
 		b	1b
-
-/*
- * PSR bits
- */
-#define SVC_MODE	0x00000013
-#define PSR_F_BIT	0x00000040
-#define PSR_I_BIT	0x00000080
-
-.text
-.arm
-main:
-	setmode	PSR_F_BIT | PSR_I_BIT | SVC_MODE, r9 @ ensure svc mode
-						@ and irqs disabled
-	mrc	p15, 0, r9, c0, c0		@ get processor id
-
-	mov	r4, #OS_Maintainer
-
-	mov	r5, #(_str_end - _str_start)
-	mov	r6, #0
-
-loop:
-	ldrb	r0, [r4]
-	mov	lr, pc
-	bl	printch 
-	add	r6, r6, #1
-	cmp	r6, r5
-	beq	out
-	add	r4, r4, #1
-	b	loop
-out:
-
-	mov	r0, #'\n'
-	bl	printch 
-
-	mov	sp, #0x20000
-	bl	os_main
-
-finished:
-	mov	r0, r0
-	b	finished
 
 OS_Maintainer:
 _str_start:
