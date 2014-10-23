@@ -4,6 +4,8 @@ CC=arm-eabi-gcc LD=arm-eabi-ld make all
 
 How to load
 -----------
+1) Prepare Android QEMU
+2) ./external/qemu/objs/emulator -sysdir out/target/product/generic/ -system out/target/product/generic/system.img -ramdisk out/target/product/generic/ramdisk.img -data out/target/product/generic/userdata.img -kernel ./gos.elf -memory 1024 -partition-size 640 -show-kernel -verbose
 
 Clean
 -----
