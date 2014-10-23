@@ -1,0 +1,10 @@
+Build
+-----
+CC=arm-eabi-gcc LD=arm-eabi-ld make all
+
+How to load
+-----------
+
+Clean
+-----
+make clean
