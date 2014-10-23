@@ -1,21 +1,3 @@
-/*
- *  linux/lib/vsprintf.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
-
-/* vsprintf.c -- Lars Wirzenius & Linus Torvalds. */
-/*
- * Wirzenius wrote this portably, Torvalds fucked it up :-)
- */
-
-/*
- * Fri Jul 13 2001 Crutcher Dunnavant <crutcher+kernel@datastacks.com>
- * - changed to provide snprintf and vsnprintf functions
- * So Feb  1 16:51:32 CET 2004 Juergen Quade <quade@hsnr.de>
- * - scnprintf and vscnprintf
- */
-
 #include <stdarg.h>
 #include <string.h>
 #include "ctype.h"
@@ -980,4 +962,22 @@ int sprintf(char *buf, const char *fmt, ...)
 
 	return i;
 }
+
+void gos_printf(const char* format, ...)
+{
+	int i, n;
+	char buf[128];
+	va_list argv;
+
+	va_start(argv, format);
+	n = vscnprintf(buf, sizeof(buf), format, argv);
+	va_end(argv);
+
+	for (i = 0; i < n; i++) {
+		if (buf[i] == '\0')
+			break;
+		printch(buf[i]);
+	}
+}
+
 
