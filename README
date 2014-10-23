@@ -1,12 +1,26 @@
+2014, Oct, 23
+
 Build
 -----
-CC=arm-eabi-gcc LD=arm-eabi-ld make all
 
-How to load
------------
-1) Prepare Android QEMU
-2) ./external/qemu/objs/emulator -sysdir out/target/product/generic/ -system out/target/product/generic/system.img -ramdisk out/target/product/generic/ramdisk.img -data out/target/product/generic/userdata.img -kernel ./gos.elf -memory 1024 -partition-size 640 -show-kernel -verbose
+   $ CC=arm-eabi-gcc LD=arm-eabi-ld make all
+
+How to load your OS
+-------------------
+1) Prepare QEMU
+
+   $ git clone git://git.qemu-project.org/qemu.git
+   $ cd qemu
+   $ ./configure --prefix=/home/gogojesse/projects/qemu_bin --target-list=arm-softmmu,arm-linux-user --enable-debug
+   $ make -s
+   $ make install -s
+
+2) Run Qemu
+
+   $ ./qemu-system-arm -M versatilepb -nographic -kernel ./gos.elf
 
 Clean
 -----
-make clean
+
+   $ make clean
+
