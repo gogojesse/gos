@@ -1,3 +1,5 @@
+/* This file is modified from Linux Kernel Source. */
+
 #include <stdarg.h>
 #include <string.h>
 #include "ctype.h"
@@ -42,69 +44,6 @@ _L,_L,_L,_L,_L,_L,_L,_P,_L,_L,_L,_L,_L,_L,_L,_L};	/* 240-255 */
 	(n) = (n) / base;		\
 	rem;						\
  })
-
-
-
-/**
- * simple_strtoull - convert a string to an unsigned long long
- * @cp: The start of the string
- * @endp: A pointer to the end of the parsed string will be placed here
- * @base: The number base to use
- */
-unsigned long long simple_strtoull(const char *cp, char **endp, unsigned int base)
-{
-	unsigned long long result;
-	unsigned int rv;
-
-//	cp = _parse_integer_fixup_radix(cp, &base);
-//	rv = _parse_integer(cp, base, &result);
-	/* FIXME */
-//	cp += (rv & ~KSTRTOX_OVERFLOW);
-
-	if (endp)
-		*endp = (char *)cp;
-
-	return result;
-}
-
-/**
- * simple_strtoul - convert a string to an unsigned long
- * @cp: The start of the string
- * @endp: A pointer to the end of the parsed string will be placed here
- * @base: The number base to use
- */
-unsigned long simple_strtoul(const char *cp, char **endp, unsigned int base)
-{
-	return simple_strtoull(cp, endp, base);
-}
-
-/**
- * simple_strtol - convert a string to a signed long
- * @cp: The start of the string
- * @endp: A pointer to the end of the parsed string will be placed here
- * @base: The number base to use
- */
-long simple_strtol(const char *cp, char **endp, unsigned int base)
-{
-	if (*cp == '-')
-		return -simple_strtoul(cp + 1, endp, base);
-
-	return simple_strtoul(cp, endp, base);
-}
-
-/**
- * simple_strtoll - convert a string to a signed long long
- * @cp: The start of the string
- * @endp: A pointer to the end of the parsed string will be placed here
- * @base: The number base to use
- */
-long long simple_strtoll(const char *cp, char **endp, unsigned int base)
-{
-	if (*cp == '-')
-		return -simple_strtoull(cp + 1, endp, base);
-
-	return simple_strtoull(cp, endp, base);
-}
 
 int skip_atoi(const char **s)
 {
@@ -162,6 +101,7 @@ char *put_dec_trunc(char *buf, unsigned q)
 
 	return buf;
 }
+
 /* Same with if's removed. Always emits five digits */
 char *put_dec_full(char *buf, unsigned q)
 {
@@ -413,8 +353,8 @@ char *string(char *buf, char *end, const char *s, struct printf_spec spec)
 {
 	int len, i;
 
-	if ((unsigned long)s < 4096)
-		s = "(null)";
+//	if ((unsigned long)s < 4096)
+//		s = "(null)";
 
 	len = gos_strnlen(s, spec.precision);
 
@@ -970,7 +910,7 @@ void gos_printf(const char* format, ...)
 	va_list argv;
 
 	va_start(argv, format);
-	n = vscnprintf(buf, sizeof(buf), format, argv);
+	n = vsprintf(buf, format, argv);
 	va_end(argv);
 
 	for (i = 0; i < n; i++) {

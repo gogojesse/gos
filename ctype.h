@@ -1,10 +1,6 @@
-#ifndef _LINUX_CTYPE_H
-#define _LINUX_CTYPE_H
-
-/*
- * NOTE! This ctype does not handle EOF like the standard C
- * library is required to.
- */
+/* This file is modified from Linux Kernel Source. */
+#ifndef _CTYPE_H
+#define _CTYPE_H
 
 #define _U	0x01	/* upper */
 #define _L	0x02	/* lower */

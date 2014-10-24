@@ -1,3 +1,6 @@
+/*
+ * Copy HW definition from Linux Kernel Source.
+ */
 /* 01 .for goldfish. uart hw definition
  *
  */
@@ -34,10 +37,7 @@
  *
  */
 
-#define UART01x_DR              0x00
-#define UART01x_FR_BUSY         0x008
-#define UART01x_FR              0x18
-#define UART01x_FR_TXFF         0x020
+#include "serial_hw/serial_hw.h"
 
 /* Print Rountine. */
 	.macro	addruart, rp, rv, tmp

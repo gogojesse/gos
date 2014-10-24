@@ -1,3 +1,4 @@
+/* some definition and macro reference Linux Kernel Source. */
 /*
  * PSR bits
  */
@@ -5,7 +6,7 @@
 #define PSR_F_BIT	0x00000040
 #define PSR_I_BIT	0x00000080
 
-#include "gos_serial_hw.inc"
+#include "serial_hw/gos_serial_hw.inc"
 
 .macro	setmode, mode, reg
 	msr	cpsr_c, #\mode
@@ -15,16 +16,19 @@
 	addruart	\rx, \tmp1
 .endm
 
+#include "./init/gos_exception_handler.S"
+
+_gos_reset_handler:
 main:
 	setmode	PSR_F_BIT | PSR_I_BIT | SVC_MODE, r9 @ ensure svc mode
 						@ and irqs disabled
-	mrc	p15, 0, r9, c0, c0		@ get processor id
 
-	mov	r4, #OS_Maintainer
-
+	/* 1) Early Print Test. */
+	mov	r4, #OS_Msg
 	mov	r5, #(_str_end - _str_start)
 	mov	r6, #0
 
+	/* 2) Output char via UART0 in turn. */
 loop:
 	ldrb	r0, [r4]
 	bl	printch 
@@ -34,15 +38,37 @@ loop:
 	add	r4, r4, #1
 	b	loop
 out:
-
 	mov	r0, #'\n'
 	bl	printch 
 
-	mov	sp, #0x4000
+	/* 3) Setup stack point before calling C. */
+	ldr	sp, =_gos_stack_end
 	bl	os_main
 
 finished:
-	mov	r0, r0
+	b	.
+
+_gos_undfd_handler:
+	mov	r0, #'\n'
+	bl	printch 
+
+	/* print error message. */
+	mov	r4, #undfd_instr
+	mov	r5, #(_str_2end - _str_2start)
+	mov	r6, #0
+
+loop2:
+	ldrb	r0, [r4]
+	bl	printch 
+	add	r6, r6, #1
+	cmp	r6, r5
+	beq	out2
+	add	r4, r4, #1
+	b	loop2
+out2:
+
+	mov	r0, #'\n'
+	bl	printch 
 	b	finished
 
 .global printascii
@@ -68,8 +94,14 @@ printch:
 		mov	r0, #0
 		b	1b
 
-OS_Maintainer:
+OS_Msg:
 _str_start:
-	.string	"gogojesse <gogojesseco@gmail.com>"
+	.string	"GOS Booting..."
 _str_end:
+
+.align 2
+undfd_instr:
+_str_2start:
+	.string	"undefined instruction"
+_str_2end:
 
