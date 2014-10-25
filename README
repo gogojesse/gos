@@ -3,7 +3,7 @@
 Build
 -----
 
-   $ CC=arm-eabi-gcc LD=arm-eabi-ld make all
+   $ CC=arm-eabi-gcc LD=arm-eabi-ld ToolChainLib=/toolchains/gcc-arm-none-eabi-4_8-2014q3/lib/gcc/arm-none-eabi/4.8.4/libgcc.a make all
 
 How to load your OS
 -------------------
