@@ -22,7 +22,7 @@ gos_img = gos.elf
 	$(CC) $(gos_cpu_flags) -I./ -I$(INC_DIR) -c $< -o $*.o
 
 all:	$(gos_objs)
-	$(LD) -T $(linkscript) -o $(gos_img) $(gos_objs) $(NewLibc)
+	$(LD) -T $(linkscript) -o $(gos_img) $(gos_objs) $(NewLibc) $(ToolChainLib)
 
 clean: 
 	rm $(gos_img) $(gos_objs)
