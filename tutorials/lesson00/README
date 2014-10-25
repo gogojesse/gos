@@ -1,0 +1,30 @@
+Setup development
+-----------------
+
+    # 1. Download arm toolchain (compiler, assembler and linker)
+
+        $ mkdir -p /toolchains;cd /toolchains/
+
+        # Linux
+        $ wget https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2
+
+        # MacOS
+        $ wget https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-mac.tar.bz2 --no-check-certificate
+
+    # 2. Extract to /toolchains
+
+        $ tar jxvf *.tar.bz2
+
+    # 3. Export PATH and Environment Variables
+
+        $ export PATH=$PATH:/toolchains/gcc-arm-none-eabi-4_8-2014q3/bin
+
+    # 4. Prepare QEMU
+
+        $ git clone git://git.qemu-project.org/qemu.git
+        $ cd qemu
+        $ git submodule update --init dtc
+        $ ./configure --prefix=/home/username/projects/qemu_bin --enable-debug
+        $ make -s
+        $ make install -s
+
