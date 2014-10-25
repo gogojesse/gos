@@ -1,0 +1,45 @@
+# gos.S source code has only 4 lines as follow.
+
+    main:
+	mov	r0, #0x0	/* set register r0 = 0x0 */
+	add	r0, r0, #1	/* r0 = r0 + 1 */
+	b	.		/* goto this line forever (endless loop). */
+
+# Because we don't have a real C main() function. We need a linkscript
+# to tell linker how to link object code to ELF file.
+
+
+# Build gos.S
+
+    $ arm-none-eabi-as -mcpu=arm926ej-s -o gos.o gos.S
+
+# Link it to ELF format
+
+    $ arm-none-eabi-ld -T gos.lds -o gos.elf gos.o
+
+# how to debug
+1) In console "A", execute qemu in GDB mode with our gos.elf
+
+    # option "-S -s" will force qemu wait for gdb connect to itself.
+    # gdb default uses port 1234
+    $ ./qemu-system-arm -M versatilepb -nographic -kernel gos.elf -S -s
+
+    # ctrl+a z to exit from qemu
+
+2) In console "B", execute gdb to connect to QEMU. (like HW ICE)
+
+    # launch gdb
+    $ arm-none-eabi-gdb
+
+    # after gdb launched. in gdb console.
+    (gdb) file gos.elf			# load symbol
+    (gdb) target remote localhost:1234	# connect to qemu
+    (gdb) layout asm			# show asm code window and point
+					# out where code pc point to.
+    (gdb) stepi				# execute one asm line
+    (gdb) p $r0				# r0 = 0
+    (gdb) stepi
+    (gdb) p $r0				# r0 = 1
+    (gdb) stepi				# code will spin at 0x8 forever.
+    (gdb) quit				# ctrl+a z to exit from qemu
+
