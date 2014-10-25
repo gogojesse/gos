@@ -28,6 +28,10 @@ Learn GOS step by step
 ----------------------
 1) change folder to "tutorials"
 
+   # lesson00 is for environment setup.
+   $ cd ./tutorials/lession00
+
+   # lesson01 is for first exercises for gdb and baremetal program on ARM.
    $ cd tutorials/lesson01/
 
 2) read the README and follow the instructions
