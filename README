@@ -24,3 +24,10 @@ Clean
 
    $ make clean
 
+Learn GOS step by step
+----------------------
+1) change folder to "tutorials"
+
+   $ cd tutorials/lesson01/
+
+2) read the README and follow the instructions
