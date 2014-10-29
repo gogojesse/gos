@@ -20,7 +20,10 @@
 
 _gos_reset_handler:
 main:
-	setmode	PSR_F_BIT | PSR_I_BIT | SVC_MODE, r9 @ ensure svc mode
+	/*setmode	PSR_F_BIT | PSR_I_BIT | SVC_MODE, r9 @ ensure svc mode
+						@ and irqs disabled
+	*/
+	setmode	SVC_MODE, r9 @ ensure svc mode
 						@ and irqs disabled
 
 	/* 1) Early Print Test. */
@@ -71,6 +74,30 @@ out2:
 	bl	printch 
 	b	finished
 
+.global _gos_irq_handler
+_gos_irq_handler:
+	mov	r0, #'\n'
+	bl	printch 
+
+	/* print error message. */
+	mov	r4, #irq_string
+	mov	r5, #(_str_3end - _str_3start)
+	mov	r6, #0
+
+loop3:
+	ldrb	r0, [r4]
+	bl	printch 
+	add	r6, r6, #1
+	cmp	r6, r5
+	beq	out2
+	add	r4, r4, #1
+	b	loop2
+out3:
+
+	mov	r0, #'\n'
+	bl	printch 
+	b	finished
+
 .global printascii
 printascii:
 		addruart_current r3, r1, r2
@@ -104,4 +131,10 @@ undfd_instr:
 _str_2start:
 	.string	"undefined instruction"
 _str_2end:
+
+.align 2
+irq_string:
+_str_3start:
+	.string	"irq interrupt"
+_str_3end:
 

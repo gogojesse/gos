@@ -38,6 +38,8 @@ int gos_enable_idcache(void)
 	return 0;
 }
 
+extern int timer_init (void);
+extern void vic_init2(void *base);
 void os_main(void)
 {
 	int i;
@@ -47,10 +49,17 @@ void os_main(void)
 
 	/* Print CPU Info */
 	print_cpuinfo();
+
+	/* Enable i&d cache. */
 	gos_enable_idcache();
 	print_cpuinfo();
 
-	/* Enable i&d cache. */
+	/* enable interrupt controller. */
+	vic_init2(0x10140000);
+
+	/* Setup Timer. */
+	printf("Setup a free running timer\n");
+	timer_init();
 
 	/* C library Tests. */
 	printf("Test Some C Library APIs\n");
