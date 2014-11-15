@@ -21,7 +21,7 @@ int timer_init (void)
 	tmr_ctrl_val &= ~TIMER_ENABLE;
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
 
-	tmr_ctrl_val = 0x400;	
+	tmr_ctrl_val = 0x200;	
 	printf("reload timer to <0x%08x>\n", tmr_ctrl_val);
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0) = tmr_ctrl_val;
 
@@ -36,49 +36,21 @@ int timer_init (void)
 	//tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_INT_EN | TIMER_PRS_MSK | TIMER_SIZE_MSK | TIMER_ONE_SHT );
 	tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_PRS_MSK | TIMER_SIZE_MSK | TIMER_ONE_SHT );
 	//tmr_ctrl_val |= (TIMER_ENABLE);
-	//tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_MODE_PD | TIMER_ONE_SHT);
+//	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_MODE_PD | TIMER_ONE_SHT);
 	//tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_MODE_PD);
 	//tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN);
-	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_MODE_PD | TIMER_ONE_SHT);
+	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_ONE_SHT);
 
 	printf("timer ctrl = <0x%08x>\n", tmr_ctrl_val);
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
 
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 10);
+	/*tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 10);
 	printf("raw int status = <0x%08x>\n", tmr_ctrl_val);
 	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 14);
 	printf("masked int status = <0x%08x>\n", tmr_ctrl_val);
 	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 4);
 	printf("timer value = <0x%08x>\n", tmr_ctrl_val);
-
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 10);
-	printf("raw int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 14);
-	printf("masked int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 4);
-	printf("timer value = <0x%08x>\n", tmr_ctrl_val);
-
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 10);
-	printf("raw int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 14);
-	printf("masked int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 4);
-	printf("timer value = <0x%08x>\n", tmr_ctrl_val);
-
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 10);
-	printf("raw int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 14);
-	printf("masked int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 4);
-	printf("timer value = <0x%08x>\n", tmr_ctrl_val);
-
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 10);
-	printf("raw int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 14);
-	printf("masked int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 4);
-	printf("timer value = <0x%08x>\n", tmr_ctrl_val);
-
+*/
 	return 0;
 }
 
