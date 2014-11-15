@@ -1,11 +1,4 @@
 /* some definition and macro reference Linux Kernel Source. */
-/*
- * PSR bits
- */
-#define SVC_MODE	0x00000013
-#define PSR_F_BIT	0x00000040
-#define PSR_I_BIT	0x00000080
-
 #include "serial_hw/gos_serial_hw.inc"
 
 .macro	setmode, mode, reg
@@ -18,14 +11,31 @@
 
 #include "./init/gos_exception_handler.S"
 
+/*
+ * Program Status Register
+ */
+#define USR_MODE	0b10000
+#define FIQ_MODE	0b10001
+#define IRQ_MODE	0b10010
+#define SVC_MODE	0b10011
+#define ABT_MODE	0b10111
+#define UDF_MODE	0b11011
+#define SYS_MODE	0b11111	
+#define PSR_F_BIT	(1 << 6)
+#define PSR_I_BIT	(1 << 7)
+
 _gos_reset_handler:
 main:
-	/*setmode	PSR_F_BIT | PSR_I_BIT | SVC_MODE, r9 @ ensure svc mode
-						@ and irqs disabled
-	*/
-	setmode	SVC_MODE, r9 @ ensure svc mode
-						@ and irqs disabled
+	setmode	SVC_MODE | PSR_F_BIT | PSR_I_BIT, r9 @ ensure svc mode
+						     @ and irqs disabled
+	ldr	sp, =_gos_stack_end
 
+	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT, r9 @ switch irq mode
+						     @ and irqs disabled
+	ldr	sp, =_gos_irq_stack_end
+
+	setmode	SVC_MODE, r9                        @ back to svc mode
+						     @ with fiq&irqs enabled
 	/* 1) Early Print Test. */
 	mov	r4, #OS_Msg
 	mov	r5, #(_str_end - _str_start)
@@ -76,26 +86,36 @@ out2:
 
 .global _gos_irq_handler
 _gos_irq_handler:
+
+	SUB	lr, lr, #4	@ Adjust the return address
+				@ before we save it.
+	STMFD	sp!, {lr}	@ Stack return address
+	MRS	r14, SPSR	@ get the SPSR ...
+	STMFD	sp!, {r12, r14}
+
+	/* Need to clear interrupt here. */
+/*
+	MRS	r12, CPSR 		@ Read the status register.
+	ORR	r12, r12, #0x80 	@ Set the I bit
+					@ (use 0x40 for the F bit).
+	MSR	CPSR_c, r12 		@ Write it back to disable interrupts.
+*/
+	mov	r0, #'I'
+	bl	printch 
+	mov	r0, #'R'
+	bl	printch 
+	mov	r0, #'Q'
+	bl	printch 
 	mov	r0, #'\n'
 	bl	printch 
 
-	/* print error message. */
-	mov	r4, #irq_string
-	mov	r5, #(_str_3end - _str_3start)
-	mov	r6, #0
-
-loop3:
-	ldrb	r0, [r4]
-	bl	printch 
-	add	r6, r6, #1
-	cmp	r6, r5
-	beq	out2
-	add	r4, r4, #1
-	b	loop2
-out3:
-
-	mov	r0, #'\n'
-	bl	printch 
+irq_exit:
+	LDMFD	sp!, {r12, r14}		@ Restore r12 and get SPSR.
+	
+	ORR	r14, r14, #0x80 	@ Set the I bit
+	
+	MSR	SPSR_csxf, r14		@ Restore status register from r14.
+	LDMFD	sp!, {pc}^ 		@ Return from handler.
 	b	finished
 
 .global printascii
