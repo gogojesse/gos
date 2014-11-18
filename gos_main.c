@@ -4,6 +4,8 @@ extern void gos_printf(const char* format, ...);
 #include "stdlib.h"
 #include "string.h"
 
+#include "inc/task.h"
+
 static unsigned int gos_cpu_info = 0x0;
 
 void print_cpuinfo(void)
@@ -38,6 +40,11 @@ int gos_enable_idcache(void)
 	return 0;
 }
 
+void print_taskid(unsigned int taskid)
+{
+	printf("Task ID = %d\n", taskid);
+}
+
 extern int timer_init (void);
 extern void vic_init2(void *base);
 void os_main(void)
@@ -54,8 +61,11 @@ void os_main(void)
 	gos_enable_idcache();
 	print_cpuinfo();
 
+	/* Initialize the task structures. */
+	init_task_struct();
+
 	/* enable interrupt controller. */
-	vic_init2(0x10140000);
+	vic_init2((void *)0x10140000);
 
 	/* Setup Timer. */
 	printf("Setup a free running timer\n");
