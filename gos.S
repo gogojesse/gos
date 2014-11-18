@@ -1,6 +1,7 @@
 /* some definition and macro reference Linux Kernel Source. */
 #include "serial_hw/gos_serial_hw.inc"
 
+
 .macro	setmode, mode, reg
 	msr	cpsr_c, #\mode
 .endm
@@ -10,6 +11,8 @@
 .endm
 
 #include "./init/gos_exception_handler.S"
+
+.global    gcurrtask
 
 /*
  * Program Status Register
@@ -87,11 +90,49 @@ out2:
 .global _gos_irq_handler
 _gos_irq_handler:
 
+#if 0
 	SUB	lr, lr, #4	@ Adjust the return address
 				@ before we save it.
-	STMFD	sp!, {lr}	@ Stack return address
-	MRS	r14, SPSR	@ get the SPSR ...
-	STMFD	sp!, {r12, r14}
+	STMFD	sp!, {lr}	@ Store program counter to stack
+	MRS	r14, SPSR	@ Store the SPSR to R14
+	STMFD	sp!, {r0-r4, r14} @ Store the R0~R12 and SPSR into stack
+#endif
+
+	/* Check current task ID */
+	ldr	r12, =gcurrtask		@ load gcurrtask pointer
+	ldr	r11, [r12]		@ load task struct
+	ldr	r10, [r11]		@ load task id
+	@ldr	r9, [r11, #40]		@ r9 point to lr of tcb
+	add	r9, r11, #40		@ r9 point to lr of tcb
+
+	sub	lr, lr, #4		@ Adjust the return address
+	stmfd	r9!, {lr}		@ Store return addr
+	mrs	r14, spsr		@ Store the SPSR to R14
+	stmfd	r9!, {r0-r4, r14}	@ Store the R0~R4 and
+					@ SPSR into stack
+
+	/* switch to svc mode. */
+	ORR	r14, r14, #0x80 	@ !!! testing code.. Set the Irq disable
+	MSR	SPSR_csxf, r14		@ Restore status register from r14.
+
+	stmfd	r9!, {sp}		@ Store return addr
+
+	/* context switch to next task */
+	ldr	r10, [r11, #44]
+	add	r9, r11, #44
+	str	r9, [r12]
+	@ldr	r9, [r11, #56]		@ r9 point to lr of tcb
+	add	r9, r11, #56		@ r9 point to lr of tcb
+
+	LDMFD	r9!, {sp}		@ restore sp
+	LDMFD	r9!, {r0-r4, r14}	@ Restore r0~r12 and SPSR.
+/*	MSR	SPSR_csxf, r14		@ Restore status register from r14. */
+	LDMFD	r9!, {pc}^ 		@ Return from handler.
+
+	@ mov	r0, r1	
+	@ bl	print_taskid
+
+	/* store regs into task's sp. */
 
 	/* Need to clear interrupt here. */
 /*
@@ -110,9 +151,9 @@ _gos_irq_handler:
 	bl	printch 
 
 irq_exit:
-	LDMFD	sp!, {r12, r14}		@ Restore r12 and get SPSR.
+	LDMFD	sp!, {r0-r4, r14}	@ Restore r0~r12 and SPSR.
 	
-	ORR	r14, r14, #0x80 	@ Set the I bit
+	ORR	r14, r14, #0x80 	@ !!! testing code.. Set the Irq disable
 	
 	MSR	SPSR_csxf, r14		@ Restore status register from r14.
 	LDMFD	sp!, {pc}^ 		@ Return from handler.
@@ -140,6 +181,15 @@ printch:
 		mov	r1, r0
 		mov	r0, #0
 		b	1b
+
+.global _jmp2ctx
+_jmp2ctx:
+	LDMFD	sp!, {r0-r12, r14}	@ Restore r0~r12 and SPSR.
+	MSR	SPSR_csxf, r14		@ Restore status register from r14.
+	LDMFD	sp!, {pc}^ 		@ Return from handler.
+	b	finished
+
+
 
 OS_Msg:
 _str_start:
