@@ -31,3 +31,4 @@ Features
 
    add task00, task01, task02 function.
    use timer interrupt to trigger context switch.
+   each task prints a string.
