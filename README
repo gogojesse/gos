@@ -32,3 +32,6 @@ Features
    add task00, task01, task02 function.
    use timer interrupt to trigger context switch.
    each task prints a string.
+
+3) Enable Cache
+4) add newlib as c library.
