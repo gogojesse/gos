@@ -34,3 +34,4 @@ Features
    each task prints a string.
 
 3) Enable Cache
+4) add newlib as c library.
