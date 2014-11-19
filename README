@@ -30,4 +30,4 @@ Features
 2) Basic scheduler.
 
    add task00, task01, task02 function.
-
+   use timer interrupt to trigger context switch.
