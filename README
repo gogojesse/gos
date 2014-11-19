@@ -24,3 +24,7 @@ Clean
 
    $ make clean
 
+Features
+--------
+1) Initialized interrupt controller.
+2) Basic scheduler.
