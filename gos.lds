@@ -2,7 +2,7 @@ SECTIONS {
 	. = 0x0;
 	.text : {
 		gos.o
-		gos_main.o
+		/* gos_main.o */
 		*(.text);
 	}
 	.data : { * (.data); }
