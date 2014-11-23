@@ -1,3 +1,4 @@
+#include <stdio.h>
 
 #define TIMER_ENABLE	(1 << 7)
 #define TIMER_MODE_MSK	(1 << 6)
@@ -21,51 +22,74 @@ int timer_init (void)
 	tmr_ctrl_val &= ~TIMER_ENABLE;
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
 
-	tmr_ctrl_val = 0x200;	
-	printf("reload timer to <0x%08x>\n", tmr_ctrl_val);
+	tmr_ctrl_val = 0x100;	
+	//tmr_ctrl_val = 0x1000;	
+	//tmr_ctrl_val = 0x500;	
+
+	//printf("reload timer to <0x%08x>\n", tmr_ctrl_val);
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0) = tmr_ctrl_val;
 
-	/*
-	 * Timer Mode : Periodic
-	 * Interrupt : Enabled
-	 * Prescale : 0 Stage, Clk/1
-	 * Tmr Siz : 16 Bit Counter
-	 * Tmr in Wrapping Mode
-	 */
 	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8);
-	//tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_INT_EN | TIMER_PRS_MSK | TIMER_SIZE_MSK | TIMER_ONE_SHT );
-	tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_PRS_MSK | TIMER_SIZE_MSK | TIMER_ONE_SHT );
-	//tmr_ctrl_val |= (TIMER_ENABLE);
-//	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_MODE_PD | TIMER_ONE_SHT);
-	//tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_MODE_PD);
-	//tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN);
-	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_ONE_SHT);
-
-	printf("timer ctrl = <0x%08x>\n", tmr_ctrl_val);
+	tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_INT_EN | TIMER_PRS_MSK | TIMER_SIZE_MSK | TIMER_MODE_PD);
+	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_PRS_8S | TIMER_ONE_SHT);
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
 
-	/*tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 10);
-	printf("raw int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 14);
-	printf("masked int status = <0x%08x>\n", tmr_ctrl_val);
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 4);
-	printf("timer value = <0x%08x>\n", tmr_ctrl_val);
-*/
 	return 0;
 }
 
-#define writel(v,reg)	*(volatile unsigned long *)(reg) = v
+#define writel(v,reg)	*(volatile unsigned long *)(reg) = (unsigned long)v
 #define VIC_VECT_CNTL0			0x200
 #define VIC_VECT_CNTL_ENABLE		0x010
+#define VIC_INT_CLEAR			0x014
+#define VIC_SW_INT_CLEAR		0x01C
 #define VIC_PL190_DEF_VECT_ADDR		0x034
 extern void _gos_irq_handler(void);
 
+void timer0_enable(void)
+{
+	unsigned long	tmr_ctrl_val;
+	
+	/* 1st disable the Timer */
+	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8);
+
+	/* Re-enable INT */
+	tmr_ctrl_val |= (TIMER_ENABLE);
+	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
+}
+
+void timer0_clear_int(void)
+{
+	unsigned long	tmr_ctrl_val;
+	
+	/* 1st disable the Timer */
+	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8);
+	tmr_ctrl_val &= ~TIMER_ENABLE;
+	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
+
+	/* Clear INT */	
+	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 12) = 1;
+}
+
+void vic_clearint(void *base, unsigned long bitmask)
+{
+	void *reg;
+
+	reg = base + VIC_INT_CLEAR;
+	writel(bitmask, reg);
+} 
+
+void *gtimer_mask = 0xffffffff;
+void *gtimer_base = 0x10140000;
 void vic_init2(void *base)
 {
         int i;
-	void * reg;
+	void *reg;
 
-	reg = base + 0x1c;
+	/* clear SW int */
+	reg = base + VIC_SW_INT_CLEAR;
+	writel(0xffffffff, reg);
+
+	reg = base + VIC_INT_CLEAR;
 	writel(0xffffffff, reg);
 
         for (i = 0; i < 16; i++) {
@@ -76,7 +100,7 @@ void vic_init2(void *base)
 	reg = base + VIC_PL190_DEF_VECT_ADDR;
         writel(_gos_irq_handler, reg);
 
-	reg = base + 0x10;
+	reg = base + VIC_VECT_CNTL_ENABLE;
 	writel(0xffffffff, reg);
 
 }
