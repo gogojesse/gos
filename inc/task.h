@@ -32,10 +32,11 @@ struct task_struct {
 	struct task_tcb tcb;	/* task control block 12 */
 };
 
-#define MAX_TASK	10
+//#define MAX_TASK	10
+#define MAX_TASK	3
 
 int init_task_struct(void);
-taskid task_create(unsigned int stacksize, task_func *func); 
+taskid task_create(unsigned int stacksize, task_func func); 
 taskstate task_state(taskid id); 
 int task_scheduler(void);
 void yield_cpu(void);
