@@ -69,7 +69,7 @@ taskstate task_state(taskid id)
 extern void vic_clearint(void *base, unsigned long bitmask);
 int task_scheduler(void)
 {
-	int i;
+	int i, j;
 	taskid nextid;
 
 	/*
@@ -82,7 +82,8 @@ int task_scheduler(void)
 	 * 2. Prepare forContext Switch to next
 	 *    task. Round-Robin for now. 
 	 */
-	for (i = 1; i <= MAX_TASK; i++) {
+	j = 1;
+	for (i = j; i <= (MAX_TASK * j); i+=j) {
 		nextid = (gcurrtask->id + i) % MAX_TASK;
 		//printf("try %d.\n", nextid);
 			
