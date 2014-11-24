@@ -78,8 +78,6 @@ void vic_clearint(void *base, unsigned long bitmask)
 	writel(bitmask, reg);
 } 
 
-void *gtimer_mask = 0xffffffff;
-void *gtimer_base = 0x10140000;
 void vic_init2(void *base)
 {
         int i;
