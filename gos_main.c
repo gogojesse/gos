@@ -110,6 +110,7 @@ void os_main(void)
 	dst = malloc(100);
 	src = "test";
 
+	printf("Josh test.\n");
 	printf("os_main is finished.\n");
 	while(1) {
 	//	printf("o");
