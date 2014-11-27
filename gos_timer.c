@@ -22,16 +22,15 @@ int timer_init (void)
 	tmr_ctrl_val &= ~TIMER_ENABLE;
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
 
-	tmr_ctrl_val = 0x100;	
-	//tmr_ctrl_val = 0x1000;	
-	//tmr_ctrl_val = 0x500;	
+	/* 10ms timer load. */
+	tmr_ctrl_val = 10000;	
 
-	//printf("reload timer to <0x%08x>\n", tmr_ctrl_val);
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0) = tmr_ctrl_val;
 
 	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8);
 	tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_INT_EN | TIMER_PRS_MSK | TIMER_SIZE_MSK | TIMER_MODE_PD);
-	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_PRS_8S | TIMER_ONE_SHT);
+	//tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_PRS_8S | TIMER_ONE_SHT);
+	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_ONE_SHT);
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
 
 	return 0;
