@@ -48,10 +48,13 @@ void print_taskid(unsigned int taskid)
 
 extern int timer_init (void);
 extern void vic_init2(void *base);
+#include "inc/mutex.h"
+//mutex_t test = mutex_unlocked;
+mutex_t test = mutex_locked;
 
 int task01_func(void *data)
 {
-
+	mutex_lock(&test);
 	printf("task01\n");
 
 	while(1) { ; }
@@ -62,6 +65,7 @@ int task01_func(void *data)
 int task02_func(void *data)
 {
 	printf("task02\n");
+	mutex_unlock(&test);
 	while(1) { ; }
 
 	return 0;

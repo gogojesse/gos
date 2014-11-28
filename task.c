@@ -39,11 +39,11 @@ taskid task_create(unsigned int stacksize, task_func func)
 			id = tsk->id;
 			tsk->stacksize	= stacksize;
 			tsk->state	= Task_Ready;
-			tsk->tcb.lr	= (cpureg)func;
+			tsk->tcb.pc	= (cpureg)func;
 			tsk->tcb.sp	= (cpureg)stack;
 
 			printf("Create Task %d\n", id);	
-			printf("    lr=0x%08x\n", tsk->tcb.lr);
+			printf("    pc=0x%08x\n", tsk->tcb.pc);
 			printf("    sp=0x%08x\n", tsk->tcb.sp);
 			break;
 		}

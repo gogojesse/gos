@@ -16,13 +16,14 @@ typedef enum {
 
 struct task_tcb {
 	cpureg sp;		/*                    12 */
-	cpureg r0;		/*                    16 */
-	cpureg r1;		/*                    20 */
-	cpureg r2;		/*                    24 */
-	cpureg r3;		/*                    28 */
-	cpureg r4;		/*                    32 */
-	cpureg spsr;		/*                    36 */
-	cpureg lr;		/*                    40 */
+	cpureg lr;		/*                    16 */
+	cpureg r0;		/*                    20 */
+	cpureg r1;		/*                    24 */
+	cpureg r2;		/*                    28 */
+	cpureg r3;		/*                    32 */
+	cpureg r4;		/*                    36 */
+	cpureg spsr;		/*                    40 */
+	cpureg pc;		/*                    44 */
 };
 
 struct task_struct {
