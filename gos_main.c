@@ -55,7 +55,9 @@ mutex_t test = mutex_locked;
 int task01_func(void *data)
 {
 	mutex_lock(&test);
-	printf("task01\n");
+	printf("task01_1\n");
+	yield_cpu();
+	printf("task01_2\n");
 
 	while(1) { ; }
 
@@ -64,7 +66,9 @@ int task01_func(void *data)
 
 int task02_func(void *data)
 {
-	printf("task02\n");
+	printf("task02_1\n");
+	yield_cpu();
+	printf("task02_2\n");
 	mutex_unlock(&test);
 	while(1) { ; }
 
@@ -73,7 +77,9 @@ int task02_func(void *data)
 
 int idle_task(void *data)
 {
-	printf("idle task\n");
+	printf("idle task_1\n");
+	yield_cpu();
+	printf("idle task_2\n");
 	while(1) { ; }
 	return 0;
 }

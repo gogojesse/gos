@@ -157,8 +157,8 @@ _gos_irq_handler:
 
 	LDMFD	r9!, {sp}		@ restore sp
 	LDMFD	r9!, {lr} 		@ Return from handler.
-	LDMFD	r9!, {r0-r4, r12}	@ Restore r0~r12 and SPSR.
-	MSR	SPSR_csxf, r12		@ Restore status register from r14.
+	LDMFD	r9!, {r0-r4, r12}	@ Restore r0~r4 and SPSR.
+	MSR	SPSR_csxf, r12		@ Restore status register from r12.
 	LDMFD	r9!, {pc}^ 		@ Return from handler.
 	b	.
 #endif
@@ -172,8 +172,8 @@ _gos_irq_handler:
 	add	r9, r11, #12		@ r9 point to lr of tcb
 	LDMFD	r9!, {sp}		@ restore sp
 	LDMFD	r9!, {lr}		@ restore lr
-	LDMFD	r9!, {r0-r4, r12}	@ Restore r0~r12 and SPSR.
-	MSR	SPSR_csxf, r12		@ Restore status register from r14.
+	LDMFD	r9!, {r0-r4, r12}	@ Restore r0~r4 and SPSR.
+	MSR	SPSR_csxf, r12		@ Restore status register from r12.
 	LDMFD	r9!, {pc}^ 		@ Return from handler.
 
 	b	finished
