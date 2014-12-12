@@ -53,6 +53,7 @@ taskid task_create(unsigned int stacksize, task_func func)
 		idle_sp = stack;
 	}
 
+
 	return id;
 }
 
@@ -104,9 +105,37 @@ context_switch:
 
 void yield_cpu(void)
 {
-	/* Save Address, LR-8 */
+    /* Save Address, LR-8 */
+    asm ("ldr r12, =gcurrtask");
+    asm ("ldr r11, [r12]");
+    asm ("ldr r10, [r11]");
+    asm ("ldr r10, [r11, #8]");
+    asm ("add r9, r11, #48");
 
-	/* Switch to another task. */
+    asm ("stmfd r9!, {lr}");
+    asm ("mrs r14, spsr");
+    asm ("stmfd r9!, {r0-r4, r14}");
+
+    asm ("cmp r10, #1");
+    asm ("ldreq sp, =idle_sp");
+
+    asm ("stmfd r9!, {lr}");
+    asm ("stmfd r9!, {sp}");
+
+    timer0_clear_int();
+    task_scheduler();
+    timer0_enable();
+
+    /* Switch to another task. */
+    asm ("ldr r12, =gcurrtask");
+    asm ("ldr r11, [r12]");
+    asm ("ldr r10, [r11]");
+    asm ("add r9, r11, #12");
+    asm ("LDMFD r9!, {sp}");
+    asm ("LDMFD r9!, {lr}");
+    asm ("LDMFD r9!, {r0-r4, r12}");
+    asm ("MSR SPSR_csxf, r12");
+    asm ("LDMFD r9!, {pc}^");
 }
 
 
