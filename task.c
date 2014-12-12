@@ -105,6 +105,10 @@ context_switch:
 
 void yield_cpu(void)
 {
+    timer0_clear_int();
+
+    asm ("pop {fp, lr}");
+
     /* Save Address, LR-8 */
     asm ("ldr r12, =gcurrtask");
     asm ("ldr r11, [r12]");
@@ -122,7 +126,6 @@ void yield_cpu(void)
     asm ("stmfd r9!, {lr}");
     asm ("stmfd r9!, {sp}");
 
-    timer0_clear_int();
     task_scheduler();
     timer0_enable();
 
