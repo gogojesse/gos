@@ -112,14 +112,14 @@ _gos_irq_handler:
 #endif
 
 	/* Check current task ID */
-	ldr	r12, =gcurrtask		@ load gcurrtask pointer
-	ldr	r11, [r12]		@ load task struct
-	ldr	r10, [r11]		@ load task id
-	ldr	r10, [r11, #8]		@ load task state
-	add	r9, r11, #48		@ r9 point to pc of tcb
+	ldr	r8, =gcurrtask		@ load gcurrtask pointer
+	ldr	r7, [r8]		@ load task struct
+	ldr	r6, [r7]		@ load task id
+	ldr	r6, [r7, #8]		@ load task state
+	add	r9, r7, #48		@ r9 point to pc of tcb
 
 	/* calc lr */
-	cmp	r10, #1
+	cmp	r6, #1
 	ldreq	lr, =idle_task
 	subne	lr, lr, #4		@ Adjust the return address
 
@@ -135,7 +135,7 @@ _gos_irq_handler:
 	setmode	SVC_MODE                            @ back to svc mode
 	/*MSR	SPSR_csxf, r14*/		@ Restore status register from r14.
 
-	cmp	r10, #1
+	cmp	r6, #1
 	ldreq	sp, =idle_sp
 
 	/* Save SVC sp.  */
@@ -166,14 +166,14 @@ _gos_irq_handler:
 	bl	timer0_enable
 
 	/* context switch to next task */
-	ldr	r12, =gcurrtask		@ load gcurrtask pointer
-	ldr	r11, [r12]		@ load task struct
-	ldr	r10, [r11]		@ load task id
-	add	r9, r11, #12		@ r9 point to lr of tcb
+	ldr	r8, =gcurrtask		@ load gcurrtask pointer
+	ldr	r7, [r8]		@ load task struct
+	ldr	r6, [r7]		@ load task id
+	add	r9, r7, #12		@ r9 point to lr of tcb
 	LDMFD	r9!, {sp}		@ restore sp
 	LDMFD	r9!, {lr}		@ restore lr
-	LDMFD	r9!, {r0-r4, r12}	@ Restore r0~r4 and SPSR.
-	MSR	SPSR_csxf, r12		@ Restore status register from r12.
+	LDMFD	r9!, {r0-r4, r8}	@ Restore r0~r4 and SPSR.
+	MSR	SPSR_csxf, r8		@ Restore status register from r12.
 	LDMFD	r9!, {pc}^ 		@ Return from handler.
 
 	b	finished
