@@ -111,32 +111,42 @@ _gos_irq_handler:
 	LDMFD	sp!, {pc}^ 		@ Return from handler.
 #endif
 
+	stmfd sp!, {r0-r2}
+	stmfd sp!, {r3-r7}
+	stmfd sp!, {r8-r12}
+	mrs r0, spsr
+
 	/* Check current task ID */
 	ldr	r8, =gcurrtask		@ load gcurrtask pointer
 	ldr	r7, [r8]		@ load task struct
 	ldr	r6, [r7]		@ load task id
 	ldr	r6, [r7, #8]		@ load task state
-	add	r9, r7, #48		@ r9 point to pc of tcb
+	add	r9, r7, #80		@ r9 point to pc of tcb
 
 	/* calc lr */
 	cmp	r6, #1
-	ldreq	lr, =idle_task
-	subne	lr, lr, #4		@ Adjust the return address
+	#ldreq	lr, =idle_task
+	#subne	lr, lr, #4		@ Adjust the return address
+	sub	lr, lr, #4		@ Adjust the return address
 
 	/* Save current context. */
 	stmfd	r9!, {lr}		@ Store return addr
-	mrs	r14, spsr		@ Store the SPSR to R14
-	stmfd	r9!, {r0-r4, r14}	@ Store R0~R4 and spsr to stack
+	stmfd	r9!, {r0}		@ Store spsr to stack
+	ldmfd	sp!, {r1-r5}
+	stmfd	r9!, {r1-r5}		@ Store r8 ~ r12
+	ldmfd	sp!, {r1-r5}
+	stmfd	r9!, {r1-r5}		@ Store r3 ~ r7
+	ldmfd	sp!, {r1-r3}
+	stmfd	r9!, {r1-r3}		@ Store r0 ~ r2
 
 	/* Clear INT & Reset Timer. */
 	bl	timer0_clear_int
 
 	/* switch to svc mode. */
 	setmode	SVC_MODE                            @ back to svc mode
-	/*MSR	SPSR_csxf, r14*/		@ Restore status register from r14.
 
-	cmp	r6, #1
-	ldreq	sp, =idle_sp
+	#cmp	r6, #1
+	#ldreq	sp, =idle_sp
 
 	/* Save SVC sp.  */
 	stmfd	r9!, {lr}		@ Store lr
@@ -169,12 +179,17 @@ _gos_irq_handler:
 	ldr	r8, =gcurrtask		@ load gcurrtask pointer
 	ldr	r7, [r8]		@ load task struct
 	ldr	r6, [r7]		@ load task id
-	add	r9, r7, #12		@ r9 point to lr of tcb
-	LDMFD	r9!, {sp}		@ restore sp
-	LDMFD	r9!, {lr}		@ restore lr
-	LDMFD	r9!, {r0-r4, r8}	@ Restore r0~r4 and SPSR.
-	MSR	SPSR_csxf, r8		@ Restore status register from r12.
-	LDMFD	r9!, {pc}^ 		@ Return from handler.
+	add	r12, r7, #12		@ r12 point to sp of tcb
+	LDMFD	r12!, {sp}		@ restore sp
+	LDMFD	r12!, {lr}		@ restore lr
+	LDMFD	r12!, {r0-r10}	@ Restore r0~r10
+	LDR	r11, [r12, #12]
+	push	{r11}		@ Push pc
+	LDR	r11, [r12, #8]
+	MSR	SPSR_csxf, r11		@ Restore status register from r11.
+	LDR	r11, [r12]
+	LDR	r12, [r12, #4]
+	pop	{pc}^
 
 	b	finished
 
