@@ -2,6 +2,9 @@
 
 #include "serial_hw/serial_hw.h"
 
+#include "inc/spinlock.h"
+spinlock_t spinlock_wr = spinlock_unlocked;
+
 #define GOS_UART01x_DR(paddr) (*(volatile unsigned int *)(paddr))
 #define GOS_UART01x_FR(paddr) (*(((volatile unsigned int *)(paddr))+6))
  
@@ -54,11 +57,15 @@ caddr_t _sbrk(int incr) {
 }
  
 int _write(int file, char *ptr, int len) {
+
 	int todo;
 
+        spinlock_lock(&spinlock_wr);
 	for (todo = 0; todo < len; todo++) {
 		GOS_UART01x_DR(UART01x_ADDR) = *ptr++;
 	}
+        spinlock_unlock(&spinlock_wr);
+
 	return len;
 }
 

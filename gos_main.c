@@ -6,7 +6,9 @@ extern void gos_printf(const char* format, ...);
 
 #include <unistd.h>
 #include "inc/task.h"
+#include "inc/spinlock.h"
 
+spinlock_t test = spinlock_locked;
 static unsigned int gos_cpu_info = 0x0;
 
 void print_cpuinfo(void)
@@ -48,18 +50,18 @@ void print_taskid(unsigned int taskid)
 
 extern int timer_init (void);
 extern void vic_init2(void *base);
-#include "inc/mutex.h"
-//mutex_t test = mutex_unlocked;
-mutex_t test = mutex_locked;
 
 int task01_func(void *data)
 {
-	mutex_lock(&test);
+	spinlock_lock(&test);
 	printf("task01_1\n");
 	yield_cpu();
 	printf("task01_2\n");
 
-	while(1) { ; }
+	while(1)
+	{
+		printf("task01_func print\n");
+	}
 
 	return 0;
 }
@@ -69,18 +71,26 @@ int task02_func(void *data)
 	printf("task02_1\n");
 	yield_cpu();
 	printf("task02_2\n");
-	mutex_unlock(&test);
-	while(1) { ; }
+	spinlock_unlock(&test);
+
+	while (1)
+	{
+		printf("task02_func print\n");
+	}
 
 	return 0;
 }
 
 int idle_task(void *data)
 {
+	timer_init();
 	printf("idle task_1\n");
 	yield_cpu();
 	printf("idle task_2\n");
-	while(1) { ; }
+	while(1)
+	{
+		printf("idle_task print\n");
+	}
 	return 0;
 }
 
@@ -110,7 +120,7 @@ void os_main(void)
 
 	/* Setup Timer. */
 	printf("Setup a free running timer\n");
-	timer_init();
+	//timer_init();
 
 	/* C library Tests. */
 	printf("Test Some C Library APIs\n");
@@ -121,6 +131,7 @@ void os_main(void)
 	src = "test";
 
 	printf("os_main is finished.\n");
+	idle_task(0);
 	while(1) {
 	//	printf("o");
 	}

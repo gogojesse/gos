@@ -6,12 +6,12 @@ typedef unsigned int cpureg;
 typedef int (*task_func)(void *data); 
 
 typedef enum {
-	Task_Unused	= 0x0,
-	Task_Ready	= 0x1,
-	Task_Pause	= 0x2,
-	Task_Running	= 0x4,
-	Task_Stop	= 0x8,
-	Task_Error	= 0x100
+	Task_Unused	 = 0x0,
+	Task_Ready	 = 0x1,
+	Task_Pause	 = 0x2,
+	Task_Running     = 0x4,
+	Task_Stop	 = 0x8,
+	Task_Error	 = 0x100
 } taskstate;
 
 struct task_tcb {
@@ -22,8 +22,16 @@ struct task_tcb {
 	cpureg r2;		/*                    28 */
 	cpureg r3;		/*                    32 */
 	cpureg r4;		/*                    36 */
-	cpureg spsr;		/*                    40 */
-	cpureg pc;		/*                    44 */
+	cpureg r5;		/*                    40 */
+	cpureg r6;		/*                    44 */
+	cpureg r7;		/*                    48 */
+	cpureg r8;		/*                    52 */
+	cpureg r9;		/*                    56 */
+	cpureg r10;		/*                    60 */
+	cpureg r11;		/*                    64 */
+	cpureg r12;		/*                    68 */
+	cpureg spsr;            /*                    72 */
+	cpureg pc;		/*                    76 */
 };
 
 struct task_struct {

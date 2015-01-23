@@ -105,40 +105,50 @@ context_switch:
 
 void yield_cpu(void)
 {
-    timer0_clear_int();
+        timer0_clear_int();
 
-    asm ("pop {fp, lr}");
+        asm ("pop {fp, lr}\n\t"
+             /* Save Address, LR-8 */
+             "stmfd sp!, {r0-r2}\n\t"
+             "stmfd sp!, {r3-r7}\n\t"
+             "stmfd sp!, {r8-r12}\n\t"
+             "mrs r0, spsr\n\t"
+             /* Check current task ID */
+             "ldr     r8, =gcurrtask\n\t"
+             "ldr     r7, [r8]\n\t"
+             "ldr     r6, [r7]\n\t"
+             "ldr     r6, [r7, #8]\n\t"
+             "add     r9, r7, #80\n\t"
+             /* Save current context. */
+             "stmfd   r9!, {lr}\n\t"
+             "stmfd   r9!, {r0}\n\t"
+             "ldmfd   sp!, {r1-r5}\n\t"
+             "stmfd   r9!, {r1-r5}\n\t"
+             "ldmfd   sp!, {r1-r5}\n\t"
+             "stmfd   r9!, {r1-r5}\n\t"
+             "ldmfd   sp!, {r1-r3}\n\t"
+             "stmfd   r9!, {r1-r3}\n\t"
+             "stmfd   r9!, {lr}\n\t"
+             "stmfd   r9!, {sp}");
 
-    /* Save Address, LR-8 */
-    asm ("ldr r12, =gcurrtask");
-    asm ("ldr r11, [r12]");
-    asm ("ldr r10, [r11]");
-    asm ("ldr r10, [r11, #8]");
-    asm ("add r9, r11, #48");
+        task_scheduler();
+        timer0_enable();
+        /* Switch to another task. */
 
-    asm ("stmfd r9!, {lr}");
-    asm ("mrs r14, spsr");
-    asm ("stmfd r9!, {r0-r4, r14}");
-
-    asm ("cmp r10, #1");
-    asm ("ldreq sp, =idle_sp");
-
-    asm ("stmfd r9!, {lr}");
-    asm ("stmfd r9!, {sp}");
-
-    task_scheduler();
-    timer0_enable();
-
-    /* Switch to another task. */
-    asm ("ldr r12, =gcurrtask");
-    asm ("ldr r11, [r12]");
-    asm ("ldr r10, [r11]");
-    asm ("add r9, r11, #12");
-    asm ("LDMFD r9!, {sp}");
-    asm ("LDMFD r9!, {lr}");
-    asm ("LDMFD r9!, {r0-r4, r12}");
-    asm ("MSR SPSR_csxf, r12");
-    asm ("LDMFD r9!, {pc}^");
+        asm ("ldr     r8, =gcurrtask\n\t"
+             "ldr     r7, [r8]\n\t"
+             "ldr     r6, [r7]\n\t"
+             "add     r12, r7, #12\n\t"
+             "LDMFD   r12!, {sp}\n\t"
+             "LDMFD   r12!, {lr}\n\t"
+             "LDMFD   r12!, {r0-r10}\n\t"
+             "LDR     r11, [r12, #12]\n\t"
+             "push    {r11}\n\t"
+             "LDR     r11, [r12, #8]\n\t"
+             "MSR     SPSR_csxf, r11\n\t"
+             "LDR     r11, [r12]\n\t"
+             "LDR     r12, [r12, #4]\n\t"
+             "pop     {pc}^");
 }
 
 
