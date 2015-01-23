@@ -35,3 +35,19 @@ Features
 
 3) Enable Cache
 4) add newlib as c library.
+
+References
+----------
+1) User Guide
+
+   http://infocenter.arm.com/help/topic/com.arm.doc.dui0225d/DUI0225D_versatile_application_baseboard_arm926ej_s_ug.pdf
+
+2) Timer
+
+   http://infocenter.arm.com/help/topic/com.arm.doc.ddi0271d/DDI0271.pdf
+
+3) Interrupt Controller
+
+   http://infocenter.arm.com/help/topic/com.arm.doc.ddi0181e/DDI0181.pdf
+
+
