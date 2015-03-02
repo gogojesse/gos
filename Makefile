@@ -18,15 +18,18 @@ INC_DIR = ./libc/include
 linkscript = gos.lds
 gos_img = gos.elf
 
-.S.o:
+asm_defines.h: asm_defines.c inc/task.h
+	$(CC) $(gos_cpu_flags) -S $< -o - | sed 's/#//g' | awk '($$1 == "->") { print "#define " $$2 " " $$3 }' > ./inc/$@
+
+.S.o:	asm_defines.h
 	$(CC) $(gos_cpu_flags) -I./ -I$(INC_DIR) -c $< -o $*.o
 
 .c.o:
 	$(CC) $(gos_cpu_flags) -I./ -I$(INC_DIR) -c $< -o $*.o
 
-all:	$(gos_objs)
+all:	asm_defines.h $(gos_objs)
 	$(LD) -T $(linkscript) -o $(gos_img) $(gos_objs) $(NewLibc) $(ToolChainLib)
 
 clean: 
-	rm $(gos_img) $(gos_objs)
+	rm $(gos_img) $(gos_objs) inc/asm_defines.h
 

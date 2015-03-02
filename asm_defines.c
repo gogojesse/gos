@@ -1,0 +1,19 @@
+
+#include "inc/task.h"
+
+#define offsetof __builtin_offsetof
+
+#define DEFINE(sym, val) \
+        asm volatile("\n-> " #sym " %0 " #val : : "i" (val))
+
+#define OFFSET(sym, str, mem) \
+        DEFINE(sym, offsetof(struct str, mem))
+
+void asm_defines()
+{
+	DEFINE(TASK_STRUCT_SIZE, sizeof(struct task_struct));
+	DEFINE(TCB_FRAME_SIZE, sizeof(struct task_tcb));
+
+	OFFSET(TASK_STATE_OFFSET,task_struct,state);
+}
+
