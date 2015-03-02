@@ -41,8 +41,10 @@ int timer_init (void)
 #define VIC_VECT_CNTL_ENABLE		0x010
 #define VIC_INT_CLEAR			0x014
 #define VIC_SW_INT_CLEAR		0x01C
+#define VIC_VECTADDR			0x030
 #define VIC_PL190_DEF_VECT_ADDR		0x034
 extern void _gos_irq_handler(void);
+extern void _gos_irq02_handler(void);
 
 void timer0_enable(void)
 {
@@ -96,6 +98,7 @@ void vic_init2(void *base)
 
 	reg = base + VIC_PL190_DEF_VECT_ADDR;
         writel(_gos_irq_handler, reg);
+        //writel(_gos_irq02_handler, reg);
 
 	reg = base + VIC_VECT_CNTL_ENABLE;
 	writel(0xffffffff, reg);
