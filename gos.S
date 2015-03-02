@@ -1,6 +1,6 @@
 /* some definition and macro reference Linux Kernel Source. */
 #include "serial_hw/gos_serial_hw.inc"
-
+#include "inc/asm_defines.h"
 
 .macro	setmode, mode
 	msr	cpsr_c, #\mode
@@ -89,44 +89,26 @@ out2:
 
 .global _gos_irq_handler
 _gos_irq_handler:
+@	LDR	r12, =0x10140030
+@	LDR	pc, [r12]
 
-#if 0
-	SUB	lr, lr, #4	@ Adjust the return address
-				@ before we save it.
-	STMFD	sp!, {lr}	@ Store program counter to stack
-	MRS	r14, SPSR	@ Store the SPSR to R14
-	STMFD	sp!, {r0-r4, r14} @ Store the R0~R12 and SPSR into stack
-
-	mov	r0, #'Q'
-	bl	printch 
-1:
-
-	/* Clear INT & Reset Timer. */
-	bl	timer0_clear_int
-	bl	timer0_enable
-
-	/* Context Switch */
-	LDMFD	sp!, {r0-r4, r14}	@ Restore r0~r12 and SPSR.
-	MSR	SPSR_csxf, r14		@ Restore status register from r14.
-	LDMFD	sp!, {pc}^ 		@ Return from handler.
-#endif
-
-	stmfd sp!, {r0-r2}
+	/* Save context to irq_sp before we jump to ISR. */
+	stmfd sp!, {r0-r2}		
 	stmfd sp!, {r3-r7}
 	stmfd sp!, {r8-r12}
-	mrs r0, spsr
+
+	/* At the moment, r0~r12 should be available to use. */
+	mrs r0, spsr			@ store spsr to r0
 
 	/* Check current task ID */
 	ldr	r8, =gcurrtask		@ load gcurrtask pointer
 	ldr	r7, [r8]		@ load task struct
 	ldr	r6, [r7]		@ load task id
-	ldr	r6, [r7, #8]		@ load task state
-	add	r9, r7, #80		@ r9 point to pc of tcb
+	ldr	r6, [r7, #TASK_STATE_OFFSET]		@ load task state
+	add	r9, r7, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
 
 	/* calc lr */
 	cmp	r6, #1
-	#ldreq	lr, =idle_task
-	#subne	lr, lr, #4		@ Adjust the return address
 	sub	lr, lr, #4		@ Adjust the return address
 
 	/* Save current context. */
@@ -153,26 +135,9 @@ _gos_irq_handler:
 	stmfd	r9!, {sp}		@ Store sp
 
 	/* Run scheduler */
-#if 1
 	bl	task_scheduler
-#else
-	/* context switch to next task */
-	cmp	r10, #2
-	ldrne	r10, [r11, #44]
-	ldreq	r10, [r11, #-44]
-	addne	r9, r11, #44
-	addeq	r9, r11, #-44
-	str	r9, [r12]
-	add	r9, r11, #56		@ r9 point to lr of tcb
 
-	LDMFD	r9!, {sp}		@ restore sp
-	LDMFD	r9!, {lr} 		@ Return from handler.
-	LDMFD	r9!, {r0-r4, r12}	@ Restore r0~r4 and SPSR.
-	MSR	SPSR_csxf, r12		@ Restore status register from r12.
-	LDMFD	r9!, {pc}^ 		@ Return from handler.
-	b	.
-#endif
-
+	/* Re-enable the system timer */
 	bl	timer0_enable
 
 	/* context switch to next task */
@@ -193,6 +158,29 @@ _gos_irq_handler:
 
 	b	finished
 
+.global _gos_irq02_handler
+_gos_irq02_handler:
+	mov	r0, #'\n'
+	bl	printch 
+
+	/* print error message. */
+	mov	r4, #irq02_string
+	mov	r5, #(_str_4end - _str_4start)
+	mov	r6, #0
+
+loop3:
+	ldrb	r0, [r4]
+	bl	printch 
+	add	r6, r6, #1
+	cmp	r6, r5
+	beq	out2
+	add	r4, r4, #1
+	b	loop2
+out3:
+
+	mov	r0, #'\n'
+	bl	printch 
+	b	finished
 
 .global printascii
 printascii:
@@ -235,4 +223,10 @@ irq_string:
 _str_3start:
 	.string	"irq interrupt"
 _str_3end:
+
+.align 2
+irq02_string:
+_str_4start:
+	.string	"irq 02 interrupt"
+_str_4end:
 
