@@ -92,68 +92,80 @@ _gos_irq_handler:
 @	LDR	r12, =0x10140030
 @	LDR	pc, [r12]
 
-	/* Save context to irq_sp before we jump to ISR. */
-	stmfd sp!, {r0-r2}		
-	stmfd sp!, {r3-r7}
-	stmfd sp!, {r8-r12}
+	/* Save partial context to irq_sp temporarily. */
+	stmfd sp!, {r9-r10}	/* store r9~r10 to irq_sp */	
+	stmfd sp!, {r11-r12}	/* store r11~r12 to irq_sp */	
 
-	/* At the moment, r0~r12 should be available to use. */
-	mrs r0, spsr			@ store spsr to r0
+	/* At the moment, r9~r12 should be available to use. */
+	mrs r9, spsr			@ store spsr to r9
 
-	/* Check current task ID */
-	ldr	r8, =gcurrtask		@ load gcurrtask pointer
-	ldr	r7, [r8]		@ load task struct
-	ldr	r6, [r7]		@ load task id
-	ldr	r6, [r7, #TASK_STATE_OFFSET]		@ load task state
-	add	r9, r7, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
+	/* Get tcb of current task */
+	ldr	r10, =gcurrtask		@ load gcurrtask pointer
+	ldr	r10, [r10]		@ load task struct
+	ldr	r11, [r10]		@ load task id
+	ldr	r11, [r10, #TASK_STATE_OFFSET]		@ load task state
+	add	r12, r10, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
 
-	/* calc lr */
-	cmp	r6, #1
+	/* calc lr for task resume */
+	cmp	r11, #1
 	sub	lr, lr, #4		@ Adjust the return address
 
-	/* Save current context. */
-	stmfd	r9!, {lr}		@ Store return addr
-	stmfd	r9!, {r0}		@ Store spsr to stack
-	ldmfd	sp!, {r1-r5}
-	stmfd	r9!, {r1-r5}		@ Store r8 ~ r12
-	ldmfd	sp!, {r1-r5}
-	stmfd	r9!, {r1-r5}		@ Store r3 ~ r7
-	ldmfd	sp!, {r1-r3}
-	stmfd	r9!, {r1-r3}		@ Store r0 ~ r2
+	/* Save current context. Please refer to inc/task.h */
+	stmfd	r12!, {lr}		@ Store PC 
+	stmfd	r12!, {r9}		@ Store SPSR
+	ldmfd	sp!, {r9-r10}
+	stmfd	r12!, {r9-r10}		@ Store r11 ~ r12
+	ldmfd	sp!, {r9-r10}
+	stmfd	r12!, {r9-r10}		@ Store r9 ~ r10
+	stmfd	r12!, {r0-r8}		@ Store r0 ~ r8
 
-	/* Clear INT & Reset Timer. */
+	/* Disable system timer to avoid reentrance. */
 	bl	timer0_clear_int
 
-	/* switch to svc mode. */
+	/* switch to svc mode before we get sp, lr of current task. */
 	setmode	SVC_MODE                            @ back to svc mode
 
 	#cmp	r6, #1
 	#ldreq	sp, =idle_sp
 
 	/* Save SVC sp.  */
-	stmfd	r9!, {lr}		@ Store lr
-	stmfd	r9!, {sp}		@ Store sp
+	stmfd	r12!, {lr}		@ Store lr
+	stmfd	r12!, {sp}		@ Store sp
 
-	/* Run scheduler */
+	/* We've stored all context of current task. */
+	/* Run scheduler to pick up next task. */
 	bl	task_scheduler
 
 	/* Re-enable the system timer */
 	bl	timer0_enable
 
-	/* context switch to next task */
-	ldr	r8, =gcurrtask		@ load gcurrtask pointer
-	ldr	r7, [r8]		@ load task struct
-	ldr	r6, [r7]		@ load task id
-	add	r12, r7, #12		@ r12 point to sp of tcb
+	/* context switch to next task. */
+	/* schduler should assign new task to gcurrtask. */
+	ldr	r1, =gcurrtask		@ load gcurrtask pointer
+	ldr	r1, [r1]		@ load task struct
+	ldr	r2, [r1]		@ load task id
+	add	r12, r1, #12		@ r12 point to sp of tcb
+
+	/* Start to restore. */
 	LDMFD	r12!, {sp}		@ restore sp
 	LDMFD	r12!, {lr}		@ restore lr
-	LDMFD	r12!, {r0-r10}	@ Restore r0~r10
+	LDMFD	r12!, {r0-r10}		@ Restore r0~r10
+
+	/* Push PC to svc_sp */
 	LDR	r11, [r12, #12]
 	push	{r11}		@ Push pc
+
+	/* restore spsr */
 	LDR	r11, [r12, #8]
-	MSR	SPSR_csxf, r11		@ Restore status register from r11.
+	MSR	SPSR_csxf, r11
+
+	/* restore r11. */
 	LDR	r11, [r12]
+
+	/* restore r12 itself. */
 	LDR	r12, [r12, #4]
+
+	/* retore pc to new task. */
 	pop	{pc}^
 
 	b	finished
