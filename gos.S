@@ -94,18 +94,26 @@ _gos_irq_handler:
 
 	/* Save context to irq_sp before we jump to ISR. */
 	stmfd sp!, {r0-r2}		
-	stmfd sp!, {r3-r7}
-	stmfd sp!, {r8-r12}
+@	stmfd sp!, {r3-r7}
+@	stmfd sp!, {r8-r12}
+	stmfd sp!, {r3-r12}
 
 	/* At the moment, r0~r12 should be available to use. */
 	mrs r0, spsr			@ store spsr to r0
 
 	/* Check current task ID */
-	ldr	r8, =gcurrtask		@ load gcurrtask pointer
-	ldr	r7, [r8]		@ load task struct
-	ldr	r6, [r7]		@ load task id
-	ldr	r6, [r7, #TASK_STATE_OFFSET]		@ load task state
-	add	r9, r7, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
+@	ldr	r8, =gcurrtask		@ load gcurrtask pointer
+@	ldr	r7, [r8]		@ load task struct
+@	ldr	r6, [r7]		@ load task id
+@	ldr	r6, [r7, #TASK_STATE_OFFSET]		@ load task state
+@	add	r9, r7, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
+
+@	ldr	r8, =gcurrtask		@ load gcurrtask pointer
+@	ldr	r7, [r8]		@ load task struct
+@	ldr	r6, [r7]		@ load task id
+@	ldr	r6, [r7, #TASK_STATE_OFFSET]		@ load task state
+@	add	r9, r7, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
+
 
 	/* calc lr */
 	cmp	r6, #1
