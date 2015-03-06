@@ -7,6 +7,7 @@ extern void gos_printf(const char* format, ...);
 #include <unistd.h>
 #include "inc/task.h"
 #include "inc/spinlock.h"
+#include "inc/platform-defs.h"
 
 spinlock_t test = spinlock_locked;
 static unsigned int gos_cpu_info = 0x0;
@@ -83,7 +84,10 @@ int task02_func(void *data)
 
 int idle_task(void *data)
 {
+	/* Setup Timer. */
+	printf("Setup a free running timer\n");
 	timer_init();
+
 	printf("idle task_1\n");
 	yield_cpu();
 	printf("idle task_2\n");
@@ -116,12 +120,9 @@ void os_main(void)
 	task_create(1024, task02_func);
 
 	/* enable interrupt controller. */
-	vic_init2((void *)0x10140000);
+	vic_init2((void *)VIC_REGBASE);
 
-	/* Setup Timer. */
-	printf("Setup a free running timer\n");
-	//timer_init();
-
+#if 0	/* unmark these lines for basic tests of C library. */
 	/* C library Tests. */
 	printf("Test Some C Library APIs\n");
 	printf("------------------------------------------\n");
@@ -129,11 +130,8 @@ void os_main(void)
 	ptr = realloc(ptr, alloc_size);
 	dst = malloc(100);
 	src = "test";
+#endif
 
-	printf("os_main is finished.\n");
+	printf("os_main is finished. Enter idle task and never return. \n");
 	idle_task(0);
-	while(1) {
-	//	printf("o");
-	}
-
 }
