@@ -89,8 +89,6 @@ out2:
 
 .global _gos_irq_handler
 _gos_irq_handler:
-@	LDR	r12, =0x10140030
-@	LDR	pc, [r12]
 
 	/* Save partial context to irq_sp temporarily. */
 	stmfd sp!, {r9-r10}	/* store r9~r10 to irq_sp */	
@@ -118,6 +116,18 @@ _gos_irq_handler:
 	ldmfd	sp!, {r9-r10}
 	stmfd	r12!, {r9-r10}		@ Store r9 ~ r10
 	stmfd	r12!, {r0-r8}		@ Store r0 ~ r8
+
+load_isr_vec:
+	LDR	r8, =0x10140030
+	LDR	pc, [r8]
+
+@	b	finished
+
+.global _sys_timer
+_sys_timer:
+
+	/* ACK VIC to clear INTR */
+	str	r0, [r8]
 
 	/* Disable system timer to avoid reentrance. */
 	bl	timer0_clear_int
