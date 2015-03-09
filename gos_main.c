@@ -50,6 +50,7 @@ void print_taskid(unsigned int taskid)
 }
 
 extern int timer_init (void);
+extern int timer1_init (void);
 extern void vic_init2(void *base);
 
 int task01_func(void *data)
@@ -61,7 +62,7 @@ int task01_func(void *data)
 
 	while(1)
 	{
-		printf("task01_func print\n");
+//		printf("task01_func print\n");
 	}
 
 	return 0;
@@ -76,7 +77,7 @@ int task02_func(void *data)
 
 	while (1)
 	{
-		printf("task02_func print\n");
+//		printf("task02_func print\n");
 	}
 
 	return 0;
@@ -87,13 +88,14 @@ int idle_task(void *data)
 	/* Setup Timer. */
 	printf("Setup a free running timer\n");
 	timer_init();
+	timer1_init();
 
 	printf("idle task_1\n");
 	yield_cpu();
 	printf("idle task_2\n");
 	while(1)
 	{
-		printf("idle_task print\n");
+//		printf("idle_task print\n");
 	}
 	return 0;
 }
