@@ -123,6 +123,65 @@ load_isr_vec:
 
 @	b	finished
 
+.global _os_timer
+_os_timer:
+
+	/* ACK VIC to clear INTR */
+	str	r0, [r8]
+
+	/* Disable system timer to avoid reentrance. */
+	bl	timer1_clear_int
+
+	/* switch to svc mode before we get sp, lr of current task. */
+	setmode	SVC_MODE                            @ back to svc mode
+
+	#cmp	r6, #1
+	#ldreq	sp, =idle_sp
+
+	/* Save SVC sp.  */
+	stmfd	r12!, {lr}		@ Store lr
+	stmfd	r12!, {sp}		@ Store sp
+
+	/* We've stored all context of current task. */
+	/* Run scheduler to pick up next task. */
+@	bl	task_scheduler
+	bl	os_timer_isr
+
+	/* Re-enable the system timer */
+	bl	timer1_enable
+
+	/* context switch to next task. */
+	/* schduler should assign new task to gcurrtask. */
+	ldr	r1, =gcurrtask		@ load gcurrtask pointer
+	ldr	r1, [r1]		@ load task struct
+	ldr	r2, [r1]		@ load task id
+	add	r12, r1, #12		@ r12 point to sp of tcb
+
+	/* Start to restore. */
+	LDMFD	r12!, {sp}		@ restore sp
+	LDMFD	r12!, {lr}		@ restore lr
+	LDMFD	r12!, {r0-r10}		@ Restore r0~r10
+
+	/* Push PC to svc_sp */
+	LDR	r11, [r12, #12]
+	push	{r11}		@ Push pc
+
+	/* restore spsr */
+	LDR	r11, [r12, #8]
+	MSR	SPSR_csxf, r11
+
+	/* restore r11. */
+	LDR	r11, [r12]
+
+	/* restore r12 itself. */
+	LDR	r12, [r12, #4]
+
+	/* retore pc to new task. */
+	pop	{pc}^
+
+	b	finished
+
+
 .global _sys_timer
 _sys_timer:
 
