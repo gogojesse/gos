@@ -130,8 +130,10 @@ _os_timer:
 	str	r0, [r8]
 
 	/* Disable system timer to avoid reentrance. */
-	bl	timer1_clear_int
+@	bl	timer1_clear_int
 
+@	bl	os_timer_isr
+	bl	shared_isr
 	/* switch to svc mode before we get sp, lr of current task. */
 	setmode	SVC_MODE                            @ back to svc mode
 
@@ -145,10 +147,9 @@ _os_timer:
 	/* We've stored all context of current task. */
 	/* Run scheduler to pick up next task. */
 @	bl	task_scheduler
-	bl	os_timer_isr
 
 	/* Re-enable the system timer */
-	bl	timer1_enable
+@	bl	timer1_enable
 
 	/* context switch to next task. */
 	/* schduler should assign new task to gcurrtask. */
