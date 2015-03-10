@@ -81,11 +81,6 @@ extern void _gos_irq02_handler(void);
 extern void _sys_timer(void);
 extern void _os_timer(void);
 
-void os_timer_isr(void)
-{
-	printf("os_timer_isr\n");
-}
-
 void timer0_enable(void)
 {
 	unsigned long	tmr_ctrl_val;

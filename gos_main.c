@@ -8,9 +8,14 @@ extern void gos_printf(const char* format, ...);
 #include "inc/task.h"
 #include "inc/spinlock.h"
 #include "inc/platform-defs.h"
+#include "inc/irq.h"
 
 spinlock_t test = spinlock_locked;
 static unsigned int gos_cpu_info = 0x0;
+
+extern int timer_init (void);
+extern int timer1_init (void);
+extern void vic_init2(void *base);
 
 void print_cpuinfo(void)
 {
@@ -49,10 +54,6 @@ void print_taskid(unsigned int taskid)
 	printf("Task ID = %d\n", taskid);
 }
 
-extern int timer_init (void);
-extern int timer1_init (void);
-extern void vic_init2(void *base);
-
 int task01_func(void *data)
 {
 	spinlock_lock(&test);
@@ -88,7 +89,6 @@ int idle_task(void *data)
 	/* Setup Timer. */
 	printf("Setup a free running timer\n");
 	timer_init();
-	timer1_init();
 
 	printf("idle task_1\n");
 	yield_cpu();
@@ -97,6 +97,16 @@ int idle_task(void *data)
 	{
 //		printf("idle_task print\n");
 	}
+	return 0;
+}
+
+
+int os_timer_isr(IRQ_RESOURCE res) /* called in IRQ mode. */
+{
+	printf("os_timer_isr\n");
+	timer1_clear_int();
+	timer1_enable();
+
 	return 0;
 }
 
@@ -134,6 +144,13 @@ void os_main(void)
 	src = "test";
 #endif
 
-	printf("os_main is finished. Enter idle task and never return. \n");
+	/* init irq mechanism. */
+	irq_init();
+
+	/* set up a isr for HW timer 2. */
+	timer1_init();
+	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
+
+	printf("os_main is finished. Enter idle task and never return.\n");
 	idle_task(0);
 }
