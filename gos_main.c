@@ -5,6 +5,8 @@ extern void gos_printf(const char* format, ...);
 #include "string.h"
 
 #include <unistd.h>
+#include <sys/time.h>
+
 #include "inc/task.h"
 #include "inc/spinlock.h"
 #include "inc/platform-defs.h"
@@ -150,6 +152,17 @@ void os_main(void)
 	/* set up a isr for HW timer 2. */
 	timer1_init();
 	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
+
+	/* gettimeofday */
+	{
+		struct timeval tv;
+		struct timezone tz;
+		gettimeofday (&tv, &tz);
+		printf("tv_sec; %d\n", tv.tv_sec);
+		printf("tv_usec; %d\n", tv.tv_usec);
+		printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
+		printf("tz_dsttime, %d\n", tz.tz_dsttime);
+	}
 
 	printf("os_main is finished. Enter idle task and never return.\n");
 	idle_task(0);
