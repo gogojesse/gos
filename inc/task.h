@@ -15,23 +15,23 @@ typedef enum {
 } taskstate;
 
 struct task_tcb {
-	cpureg sp;		/*                    12 */
-	cpureg lr;		/*                    16 */
-	cpureg r0;		/*                    20 */
-	cpureg r1;		/*                    24 */
-	cpureg r2;		/*                    28 */
-	cpureg r3;		/*                    32 */
-	cpureg r4;		/*                    36 */
-	cpureg r5;		/*                    40 */
-	cpureg r6;		/*                    44 */
-	cpureg r7;		/*                    48 */
-	cpureg r8;		/*                    52 */
-	cpureg r9;		/*                    56 */
-	cpureg r10;		/*                    60 */
-	cpureg r11;		/*                    64 */
-	cpureg r12;		/*                    68 */
-	cpureg spsr;            /*                    72 */
-	cpureg pc;		/*                    76 */
+	cpureg sp;
+	cpureg lr;
+	cpureg spsr;
+	cpureg r0;
+	cpureg r1;
+	cpureg r2;
+	cpureg r3;
+	cpureg r4;
+	cpureg r5;
+	cpureg r6;
+	cpureg r7;
+	cpureg r8;
+	cpureg r9;
+	cpureg r10;
+	cpureg r11;
+	cpureg r12;
+	cpureg pc;
 };
 
 struct task_struct {
