@@ -102,10 +102,10 @@ int idle_task(void *data)
 	return 0;
 }
 
-
+static int ddd = 0;
 int os_timer_isr(IRQ_RESOURCE res) /* called in IRQ mode. */
 {
-	printf("os_timer_isr\n");
+	printf("os_timer_isr() %d\n", ddd++);
 	timer1_clear_int();
 	timer1_enable();
 

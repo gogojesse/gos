@@ -110,18 +110,34 @@ _gos_irq_handler:
 
 	/* Save current context. Please refer to inc/task.h */
 	stmfd	r12!, {lr}		@ Store PC 
-	stmfd	r12!, {r9}		@ Store SPSR
-	ldmfd	sp!, {r9-r10}
-	stmfd	r12!, {r9-r10}		@ Store r11 ~ r12
-	ldmfd	sp!, {r9-r10}
-	stmfd	r12!, {r9-r10}		@ Store r9 ~ r10
+
+	/* Save r12 ~ r0 */
+	ldmfd	sp!, {r10-r11}
+	stmfd	r12!, {r10-r11}		@ Store r11 ~ r12
+	ldmfd	sp!, {r10-r11}
+	stmfd	r12!, {r10-r11}		@ Store r9 ~ r10
 	stmfd	r12!, {r0-r8}		@ Store r0 ~ r8
+	stmfd	r12!, {r9}		@ Store spsr
 
 load_isr_vec:
 	LDR	r8, =0x10140030
+
+	/*
+	 * Switch to SVC to get sp and lr.
+	 * Keep FIQ and IRQ in disabled.
+	 */
+	setmode	SVC_MODE | PSR_F_BIT | PSR_I_BIT	@ ensure svc mode
+							@ fiq disabled
+							@ irq disabled
+
+	/* Save SVC sp.  */
+	stmfd	r12!, {lr}		@ Store lr
+	stmfd	r12!, {sp}		@ Store sp
+
+	/* Context is saved, Jump to vector. */
 	LDR	pc, [r8]
 
-@	b	finished
+	b	finished
 
 .global _os_timer
 _os_timer:
@@ -129,59 +145,32 @@ _os_timer:
 	/* ACK VIC to clear INTR */
 	str	r0, [r8]
 
-	/* Disable system timer to avoid reentrance. */
-@	bl	timer1_clear_int
-
-@	bl	os_timer_isr
 	bl	shared_isr
-	/* switch to svc mode before we get sp, lr of current task. */
-	setmode	SVC_MODE                            @ back to svc mode
 
-	#cmp	r6, #1
-	#ldreq	sp, =idle_sp
-
-	/* Save SVC sp.  */
-	stmfd	r12!, {lr}		@ Store lr
-	stmfd	r12!, {sp}		@ Store sp
-
-	/* We've stored all context of current task. */
-	/* Run scheduler to pick up next task. */
-@	bl	task_scheduler
-
-	/* Re-enable the system timer */
-@	bl	timer1_enable
-
-	/* context switch to next task. */
 	/* schduler should assign new task to gcurrtask. */
 	ldr	r1, =gcurrtask		@ load gcurrtask pointer
 	ldr	r1, [r1]		@ load task struct
 	ldr	r2, [r1]		@ load task id
 	add	r12, r1, #12		@ r12 point to sp of tcb
 
-	/* Start to restore. */
-	LDMFD	r12!, {sp}		@ restore sp
-	LDMFD	r12!, {lr}		@ restore lr
-	LDMFD	r12!, {r0-r10}		@ Restore r0~r10
+	/* restore sp and lr. */
+	LDMFD	r12!, {sp, lr}		@ Restore sp, lr
 
-	/* Push PC to svc_sp */
-	LDR	r11, [r12, #12]
-	push	{r11}		@ Push pc
+	/* Switch back to IRQ Mode */
+	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
+							@ fiq disabled
+							@ irq disabled
 
 	/* restore spsr */
-	LDR	r11, [r12, #8]
+	LDMFD	r12!, {r11}
 	MSR	SPSR_csxf, r11
 
-	/* restore r11. */
-	LDR	r11, [r12]
+	mov	lr, r12
 
-	/* restore r12 itself. */
-	LDR	r12, [r12, #4]
-
-	/* retore pc to new task. */
-	pop	{pc}^
+	/* restore. r0~r12, pc, should never return. */
+	LDMFD	lr!, {r0-r12, pc}^	@ Restore r0~r12, pc
 
 	b	finished
-
 
 .global _sys_timer
 _sys_timer:
@@ -193,10 +182,9 @@ _sys_timer:
 	bl	timer0_clear_int
 
 	/* switch to svc mode before we get sp, lr of current task. */
-	setmode	SVC_MODE                            @ back to svc mode
-
-	#cmp	r6, #1
-	#ldreq	sp, =idle_sp
+	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
+							@ fiq disabled
+							@ irq disabled
 
 	/* Save SVC sp.  */
 	stmfd	r12!, {lr}		@ Store lr
@@ -209,34 +197,28 @@ _sys_timer:
 	/* Re-enable the system timer */
 	bl	timer0_enable
 
-	/* context switch to next task. */
 	/* schduler should assign new task to gcurrtask. */
 	ldr	r1, =gcurrtask		@ load gcurrtask pointer
 	ldr	r1, [r1]		@ load task struct
 	ldr	r2, [r1]		@ load task id
 	add	r12, r1, #12		@ r12 point to sp of tcb
 
-	/* Start to restore. */
-	LDMFD	r12!, {sp}		@ restore sp
-	LDMFD	r12!, {lr}		@ restore lr
-	LDMFD	r12!, {r0-r10}		@ Restore r0~r10
+	/* restore sp and lr. */
+	LDMFD	r12!, {sp, lr}		@ Restore sp, lr
 
-	/* Push PC to svc_sp */
-	LDR	r11, [r12, #12]
-	push	{r11}		@ Push pc
+	/* Switch back to IRQ Mode */
+	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
+							@ fiq disabled
+							@ irq disabled
 
 	/* restore spsr */
-	LDR	r11, [r12, #8]
+	LDMFD	r12!, {r11}
 	MSR	SPSR_csxf, r11
 
-	/* restore r11. */
-	LDR	r11, [r12]
+	mov	lr, r12
 
-	/* restore r12 itself. */
-	LDR	r12, [r12, #4]
-
-	/* retore pc to new task. */
-	pop	{pc}^
+	/* restore. r0~r12, pc, should never return. */
+	LDMFD	lr!, {r0-r12, pc}^	@ Restore r0~r12, pc
 
 	b	finished
 
