@@ -36,6 +36,34 @@ Features
 3) Enable Cache
 4) add newlib as c library.
 
+Developer maintenance
+---------------------
+1. download code
+
+   $ git clone https://github.com/gogojesse/gos
+
+2. create branch for specific feature
+
+   $ git checkout -b refactor-scheduler
+
+3. commit code to local branch
+
+   $ git commit -s your_file
+
+4. push local branch back to server and create a pull-request for review.
+
+   $ git push origin your_branch_name
+   $ git pull-request -i issue_number    # if no issue number, omit the option -i
+
+5. Update codes from remote
+
+   $ git fetch					# fetch all patches back
+   $ git rebase origin/remote_branch_name
+
+6. Merge pull-request
+
+   visit github website to do it.
+
 References
 ----------
 1) User Guide
