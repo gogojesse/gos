@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <inc/io.h>
 
 #define TIMER_ENABLE	(1 << 7)
 #define TIMER_MODE_MSK	(1 << 6)
@@ -59,9 +60,6 @@ int timer1_init (void)
 
 	return 0;
 }
-
-
-#define writel(v,reg)	*(volatile unsigned long *)(reg) = (unsigned long)v
 
 #define VIC_VECT_ADDR0			0x100
 #define VIC_VECT_ADDR1			(0x100+4)

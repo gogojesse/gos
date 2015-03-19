@@ -11,6 +11,7 @@ extern void gos_printf(const char* format, ...);
 #include "inc/spinlock.h"
 #include "inc/platform-defs.h"
 #include "inc/irq.h"
+#include "inc/rtc.h"
 
 spinlock_t test = spinlock_locked;
 static unsigned int gos_cpu_info = 0x0;
@@ -146,6 +147,8 @@ void os_main(void)
 	src = "test";
 #endif
 
+	/* init rtc */
+	rtc_init();
 	/* init irq mechanism. */
 	irq_init();
 
