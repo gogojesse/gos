@@ -154,8 +154,8 @@ void yield_cpu(void)
              "add     r12, r7, #12\n\t"
              "LDMFD   r12!, {sp}\n\t"		/* sp */
              "LDMFD   r12!, {lr}\n\t"		/* lr */
-	     "msr     cpsr_c, 0b11010001\n\t"	/* switch to IRQ Mode. */
 	     "LDMFD   r12!, {r11}\n\t"		/* spsr */
+	     "msr     cpsr_c, 0b11010010\n\t"	/* switch to IRQ Mode. */
 	     "MSR     SPSR_csxf, r11\n\t"
 	     "mov     lr, r12\n\t"		/* use irq_lr as stack. */
 	     "LDMFD	lr!, {r0-r12, pc}^\n\t"); /* @ Restore r0~r12, pc */
