@@ -25,8 +25,8 @@ int timer_init (void)
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
 
 	/* 10ms timer load. */
-	tmr_ctrl_val = 10000;	
-	//tmr_ctrl_val = 1000000;	
+	//tmr_ctrl_val = 10000;	
+	tmr_ctrl_val = 1000000;	
 
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0) = tmr_ctrl_val;
 

@@ -66,7 +66,7 @@ int task01_func(void *data)
 
 	while(1)
 	{
-//		printf("task01_func print\n");
+		printf("task01_func print\n");
 	}
 
 	return 0;
@@ -81,7 +81,7 @@ int task02_func(void *data)
 
 	while (1)
 	{
-//		printf("task02_func print\n");
+		printf("task02_func print\n");
 	}
 
 	return 0;
@@ -98,7 +98,8 @@ int idle_task(void *data)
 	printf("idle task_2\n");
 	while(1)
 	{
-//		printf("idle_task print\n");
+		printf("idle_task print 0.\n");
+//		printf("idle_task print 1.\n");
 	}
 	return 0;
 }
@@ -153,8 +154,8 @@ void os_main(void)
 	irq_init();
 
 	/* set up a isr for HW timer 2. */
-	timer1_init();
-	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
+//	timer1_init();
+//	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
 
 	/* gettimeofday */
 	{
