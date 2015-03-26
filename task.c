@@ -39,8 +39,10 @@ taskid task_create(unsigned int stacksize, task_func func)
 			id = tsk->id;
 			tsk->stacksize	= stacksize;
 			tsk->state	= Task_Ready;
-			tsk->tcb.pc	= (cpureg)func;
 			tsk->tcb.sp	= (cpureg)stack;
+			tsk->tcb.lr	= (cpureg)0x123456;
+			tsk->tcb.spsr	= (cpureg)0x10;		/* User Mode */
+			tsk->tcb.pc	= (cpureg)func;
 
 			printf("Create Task %d\n", id);	
 			printf("    pc=0x%08x\n", tsk->tcb.pc);
@@ -105,8 +107,16 @@ context_switch:
 
 void yield_cpu(void)
 {
+	/* disable system timer first. */
         timer0_clear_int();
 
+	/*
+	 * Pre-save context
+	 * 1. pop fp, lr
+	 * 2. save r0 to sp
+	 * 3. save current spsr to r0
+	 * 4. disable IRQ and FIQ
+	 * */
         asm ("pop {fp, lr}\n\t"
              /* Save Address, LR-8 */
              "stmfd sp!, {r0-r2}\n\t"
@@ -120,35 +130,35 @@ void yield_cpu(void)
              "ldr     r6, [r7, #8]\n\t"
              "add     r9, r7, #80\n\t"
              /* Save current context. */
-             "stmfd   r9!, {lr}\n\t"
-             "stmfd   r9!, {r0}\n\t"
-             "ldmfd   sp!, {r1-r5}\n\t"
+             "stmfd   r9!, {lr}\n\t"		/* pc */
+             "ldmfd   sp!, {r1-r5}\n\t"		/* r12~r8 */
              "stmfd   r9!, {r1-r5}\n\t"
-             "ldmfd   sp!, {r1-r5}\n\t"
+             "ldmfd   sp!, {r1-r5}\n\t"		/* r7~r3 */
              "stmfd   r9!, {r1-r5}\n\t"
-             "ldmfd   sp!, {r1-r3}\n\t"
+             "ldmfd   sp!, {r1-r3}\n\t"		/* r2~r0 */
              "stmfd   r9!, {r1-r3}\n\t"
-             "stmfd   r9!, {lr}\n\t"
-             "stmfd   r9!, {sp}");
+             "stmfd   r9!, {r0}\n\t"		/* spsr */
+             "stmfd   r9!, {lr}\n\t"		/* lr */
+             "stmfd   r9!, {sp}");		/* sp */
 
+	/* pick up new task */
         task_scheduler();
-        timer0_enable();
-        /* Switch to another task. */
 
+	/* Re-enable system timer. */
+        timer0_enable();
+
+        /* Switch to another task. */
         asm ("ldr     r8, =gcurrtask\n\t"
              "ldr     r7, [r8]\n\t"
              "ldr     r6, [r7]\n\t"
              "add     r12, r7, #12\n\t"
-             "LDMFD   r12!, {sp}\n\t"
-             "LDMFD   r12!, {lr}\n\t"
-             "LDMFD   r12!, {r0-r10}\n\t"
-             "LDR     r11, [r12, #12]\n\t"
-             "push    {r11}\n\t"
-             "LDR     r11, [r12, #8]\n\t"
-             "MSR     SPSR_csxf, r11\n\t"
-             "LDR     r11, [r12]\n\t"
-             "LDR     r12, [r12, #4]\n\t"
-             "pop     {pc}^");
+             "LDMFD   r12!, {sp}\n\t"		/* sp */
+             "LDMFD   r12!, {lr}\n\t"		/* lr */
+	     "msr     cpsr_c, 0b11010001\n\t"	/* switch to IRQ Mode. */
+	     "LDMFD   r12!, {r11}\n\t"		/* spsr */
+	     "MSR     SPSR_csxf, r11\n\t"
+	     "mov     lr, r12\n\t"		/* use irq_lr as stack. */
+	     "LDMFD	lr!, {r0-r12, pc}^\n\t"); /* @ Restore r0~r12, pc */
 }
 
 
