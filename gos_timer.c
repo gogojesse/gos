@@ -25,8 +25,8 @@ int timer_init (void)
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 8) = tmr_ctrl_val;
 
 	/* 10ms timer load. */
-	tmr_ctrl_val = 10000;	
-	//tmr_ctrl_val = 1000000;	
+	tmr_ctrl_val = 10000;
+	//tmr_ctrl_val = 1000000;
 
 	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0) = tmr_ctrl_val;
 
@@ -48,17 +48,26 @@ int timer1_init (void)
 	tmr_ctrl_val &= ~TIMER_ENABLE;
 	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8) = tmr_ctrl_val;
 
-	/* 10ms timer load. */
-	tmr_ctrl_val = 1000000;	
+	/* 1000000 us period timer */
+	//tmr_ctrl_val = 1000000;
+	tmr_ctrl_val = 100000000;
 
 	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 0) = tmr_ctrl_val;
 
 	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8);
-	tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_INT_EN | TIMER_PRS_MSK | TIMER_SIZE_MSK | TIMER_MODE_PD);
-	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_INT_EN | TIMER_ONE_SHT);
+	tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_INT_EN | TIMER_PRS_MSK | TIMER_SIZE_MSK);
+	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_ONE_SHT | TIMER_MODE_PD);
 	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8) = tmr_ctrl_val;
 
 	return 0;
+}
+
+void timer1_curval(unsigned long * val)
+{
+        void *reg;
+
+        reg = (void *) (CONFIG_SYS_TIMER1BASE + 4);
+        *val = readl(reg);
 }
 
 #define VIC_VECT_ADDR0			0x100
