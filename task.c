@@ -25,6 +25,21 @@ int init_task_struct(void)
 extern int idle_task(void *data);
 cpureg idle_sp = 0x0;
 
+/*
+ * Program Status Register
+ * #define USR_MODE	0b10000
+ * #define FIQ_MODE	0b10001
+ * #define IRQ_MODE	0b10010
+ * #define SVC_MODE	0b10011
+ * #define ABT_MODE	0b10111
+ * #define UDF_MODE	0b11011
+ * #define SYS_MODE	0b11111	
+ * #define PSR_F_BIT	(1 << 6)
+ * #define PSR_I_BIT	(1 << 7)
+ */
+
+
+
 taskid task_create(unsigned int stacksize, task_func func)
 {
 	taskid id = -1;
@@ -41,7 +56,7 @@ taskid task_create(unsigned int stacksize, task_func func)
 			tsk->state	= Task_Ready;
 			tsk->tcb.sp	= (cpureg)stack;
 			tsk->tcb.lr	= (cpureg)0x123456;
-			tsk->tcb.spsr	= (cpureg)0x10;		/* User Mode */
+			tsk->tcb.spsr	= (cpureg)0x13;		/* SVC Mode */
 			tsk->tcb.pc	= (cpureg)func;
 
 			printf("Create Task %d\n", id);	
