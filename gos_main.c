@@ -59,14 +59,15 @@ void print_taskid(unsigned int taskid)
 
 int task01_func(void *data)
 {
-	spinlock_lock(&test);
+//	spinlock_lock(&test);
 	printf("task01_1\n");
-	yield_cpu();
+	//yield_cpu();
 	printf("task01_2\n");
 
 	while(1)
 	{
-		printf("task01_func print\n");
+		printf("1.");
+		//printf("task01_func print\n");
 	}
 
 	return 0;
@@ -75,13 +76,14 @@ int task01_func(void *data)
 int task02_func(void *data)
 {
 	printf("task02_1\n");
-	yield_cpu();
+	//yield_cpu();
 	printf("task02_2\n");
-	spinlock_unlock(&test);
+//	spinlock_unlock(&test);
 
 	while (1)
 	{
-		printf("task02_func print\n");
+		printf("2.");
+		//printf("task02_func print\n");
 	}
 
 	return 0;
@@ -94,11 +96,11 @@ int idle_task(void *data)
 	timer_init();
 
 	printf("idle task_1\n");
-	yield_cpu();
+	//yield_cpu();
 	printf("idle task_2\n");
 	while(1)
 	{
-		printf("idle_task print 0.\n");
+		printf("0.");
 //		printf("idle_task print 1.\n");
 	}
 	return 0;
@@ -125,8 +127,8 @@ void os_main(void)
 	print_cpuinfo();
 
 	/* Enable i&d cache. */
-	gos_enable_idcache();
-	print_cpuinfo();
+	//gos_enable_idcache();
+	//print_cpuinfo();
 
 	/* Initialize the task structures. */
 	init_task_struct();

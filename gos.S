@@ -105,7 +105,8 @@ _gos_irq_handler:
 	add	r12, r10, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
 
 	/* calc lr for task resume */
-	cmp	r11, #1
+	@cmp	r11, #1
+	@sub	lr, lr, #8		@ Adjust the return address
 	sub	lr, lr, #4		@ Adjust the return address
 
 	/* Save current context. Please refer to inc/task.h */
@@ -172,8 +173,16 @@ _os_timer:
 
 	b	finished
 
+/*
+ * Enter this routine under SVC Mode with FIQ and IRQ disabled.
+ */
 .global _sys_timer
 _sys_timer:
+	/* Switch back to IRQ Mode */
+	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
+							@ fiq disabled
+							@ irq disabled
+
 
 	/* ACK VIC to clear INTR */
 	str	r0, [r8]
@@ -188,11 +197,17 @@ _sys_timer:
 	/* Re-enable the system timer */
 	bl	timer0_enable
 
+ctx_sw:
 	/* schduler should assign new task to gcurrtask. */
 	ldr	r1, =gcurrtask		@ load gcurrtask pointer
 	ldr	r1, [r1]		@ load task struct
 	ldr	r2, [r1]		@ load task id
 	add	r12, r1, #12		@ r12 point to sp of tcb
+
+	setmode	SVC_MODE | PSR_F_BIT | PSR_I_BIT	@ ensure svc mode
+							@ fiq disabled
+							@ irq disabled
+
 
 	/* restore sp and lr. */
 	LDMFD	r12!, {sp, lr}		@ Restore sp, lr

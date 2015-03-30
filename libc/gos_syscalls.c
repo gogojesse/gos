@@ -60,11 +60,11 @@ int _write(int file, char *ptr, int len) {
 
 	int todo;
 
-        spinlock_lock(&spinlock_wr);
 	for (todo = 0; todo < len; todo++) {
+        spinlock_lock(&spinlock_wr);
 		GOS_UART01x_DR(UART01x_ADDR) = *ptr++;
-	}
         spinlock_unlock(&spinlock_wr);
+	}
 
 	return len;
 }
