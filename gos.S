@@ -181,15 +181,6 @@ _sys_timer:
 	/* Disable system timer to avoid reentrance. */
 	bl	timer0_clear_int
 
-	/* switch to svc mode before we get sp, lr of current task. */
-	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
-							@ fiq disabled
-							@ irq disabled
-
-	/* Save SVC sp.  */
-	stmfd	r12!, {lr}		@ Store lr
-	stmfd	r12!, {sp}		@ Store sp
-
 	/* We've stored all context of current task. */
 	/* Run scheduler to pick up next task. */
 	bl	task_scheduler
