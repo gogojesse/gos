@@ -4,6 +4,7 @@
 
 #include "inc/spinlock.h"
 spinlock_t spinlock_wr = spinlock_unlocked;
+spinlock_t heap_spinlock = spinlock_unlocked;
 
 #define GOS_UART01x_DR(paddr) (*(volatile unsigned int *)(paddr))
 #define GOS_UART01x_FR(paddr) (*(((volatile unsigned int *)(paddr))+6))
@@ -42,6 +43,7 @@ caddr_t _sbrk(int incr) {
 	extern char heap_top; /* Defined by the linker */
 	char *prev_heap_end;
  
+        //spinlock_lock(&heap_spinlock);
 	if (heap_end == 0) {
 		heap_end = &heap_low;
 	}
@@ -49,10 +51,12 @@ caddr_t _sbrk(int incr) {
  
 	if (heap_end + incr > &heap_top) {
 		/* Heap and stack collision */
+        	//spinlock_unlock(&heap_spinlock);
 		return (caddr_t)0;
 	}
  
 	heap_end += incr;
+        //spinlock_unlock(&heap_spinlock);
 	return (caddr_t) prev_heap_end;
 }
  

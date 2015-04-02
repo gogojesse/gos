@@ -57,16 +57,20 @@ void print_taskid(unsigned int taskid)
 	printf("Task ID = %d\n", taskid);
 }
 
+#define DBG_LOOP_COUNT	100000000
+
 int task01_func(void *data)
 {
-//	spinlock_lock(&test);
+	int i = 0;
+	spinlock_lock(&test);
 	printf("task01_1\n");
-	//yield_cpu();
+	yield_cpu();
 	printf("task01_2\n");
 
 	while(1)
 	{
-		printf("1.");
+		if ((i++ % DBG_LOOP_COUNT) == 0)
+			printf("1.\n");
 		//printf("task01_func print\n");
 	}
 
@@ -75,14 +79,16 @@ int task01_func(void *data)
 
 int task02_func(void *data)
 {
+	int i = 0;
 	printf("task02_1\n");
-	//yield_cpu();
+	yield_cpu();
 	printf("task02_2\n");
-//	spinlock_unlock(&test);
+	spinlock_unlock(&test);
 
 	while (1)
 	{
-		printf("2.");
+		if ((i++ % DBG_LOOP_COUNT) == 0)
+			printf("2.\n");
 		//printf("task02_func print\n");
 	}
 
@@ -91,16 +97,19 @@ int task02_func(void *data)
 
 int idle_task(void *data)
 {
+	int i = 0;
+
 	/* Setup Timer. */
 	printf("Setup a free running timer\n");
 	timer_init();
 
 	printf("idle task_1\n");
-	//yield_cpu();
+	yield_cpu();
 	printf("idle task_2\n");
 	while(1)
 	{
-		printf("0.");
+		if ((i++ % DBG_LOOP_COUNT) == 0)
+			printf("0.\n");
 //		printf("idle_task print 1.\n");
 	}
 	return 0;
