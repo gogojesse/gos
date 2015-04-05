@@ -64,7 +64,7 @@ int task01_func(void *data)
 	int i = 0;
 	spinlock_lock(&test);
 	printf("task01_1\n");
-	yield_cpu();
+	//yield_cpu();
 	printf("task01_2\n");
 
 	while(1)
@@ -81,7 +81,7 @@ int task02_func(void *data)
 {
 	int i = 0;
 	printf("task02_1\n");
-	yield_cpu();
+	//yield_cpu();
 	printf("task02_2\n");
 	spinlock_unlock(&test);
 
@@ -104,7 +104,7 @@ int idle_task(void *data)
 	timer_init();
 
 	printf("idle task_1\n");
-	yield_cpu();
+	//yield_cpu();
 	printf("idle task_2\n");
 	while(1)
 	{
