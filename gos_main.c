@@ -136,8 +136,8 @@ void os_main(void)
 	print_cpuinfo();
 
 	/* Enable i&d cache. */
-	//gos_enable_idcache();
-	//print_cpuinfo();
+	gos_enable_idcache();
+	print_cpuinfo();
 
 	/* Initialize the task structures. */
 	init_task_struct();
@@ -161,12 +161,13 @@ void os_main(void)
 
 	/* init rtc */
 	rtc_init();
+
 	/* init irq mechanism. */
 	irq_init();
 
 	/* set up a isr for HW timer 2. */
-//	timer1_init();
-//	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
+	timer1_init();
+	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
 
 	/* gettimeofday */
 	{
