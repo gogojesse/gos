@@ -10,8 +10,10 @@ extern void gos_printf(const char* format, ...);
 #include "inc/task.h"
 #include "inc/spinlock.h"
 #include "inc/platform-defs.h"
+#include "inc/timer.h"
 #include "inc/irq.h"
 #include "inc/rtc.h"
+#include "inc/io.h"
 
 spinlock_t test = spinlock_locked;
 static unsigned int gos_cpu_info = 0x0;
@@ -171,8 +173,16 @@ void os_main(void)
 
 	/* gettimeofday */
 	{
+		unsigned long i = 0;
+
 		struct timeval tv;
 		struct timezone tz;
+		gettimeofday (&tv, &tz);
+		printf("tv_sec; %d\n", tv.tv_sec);
+		printf("tv_usec; %d\n", tv.tv_usec);
+		printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
+		printf("tz_dsttime, %d\n", tz.tz_dsttime);
+		printf("gos time test\n");
 		gettimeofday (&tv, &tz);
 		printf("tv_sec; %d\n", tv.tv_sec);
 		printf("tv_usec; %d\n", tv.tv_usec);
