@@ -100,6 +100,7 @@ int task02_func(void *data)
 int idle_task(void *data)
 {
 	int i = 0;
+	char *buf;
 
 	/* Setup Timer. */
 	printf("Setup a free running timer\n");
@@ -113,8 +114,30 @@ int idle_task(void *data)
 	printf("idle task_2\n");
 	while(1)
 	{
+		buf = (char *)malloc(128);
+
 		if ((i++ % DBG_LOOP_COUNT) == 0)
-			printf("0.\n");
+		/* gettimeofday */
+		{
+			unsigned long i = 0;
+
+			struct timeval tv;
+			struct timezone tz;
+
+			gettimeofday (&tv, &tz);
+			printf("tv_sec; %d\n", tv.tv_sec);
+			printf("tv_usec; %d\n", tv.tv_usec);
+			printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
+			printf("tz_dsttime, %d\n", tz.tz_dsttime);
+			printf("gos time test\n");
+			gettimeofday (&tv, &tz);
+			printf("tv_sec; %d\n", tv.tv_sec);
+			printf("tv_usec; %d\n", tv.tv_usec);
+			printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
+			printf("tz_dsttime, %d\n", tz.tz_dsttime);
+		}
+
+		free(buf);
 //		printf("idle_task print 1.\n");
 	}
 	return 0;
@@ -170,25 +193,6 @@ void os_main(void)
 	/* set up a isr for HW timer 2. */
 	timer1_init();
 	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
-
-	/* gettimeofday */
-	{
-		unsigned long i = 0;
-
-		struct timeval tv;
-		struct timezone tz;
-		gettimeofday (&tv, &tz);
-		printf("tv_sec; %d\n", tv.tv_sec);
-		printf("tv_usec; %d\n", tv.tv_usec);
-		printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
-		printf("tz_dsttime, %d\n", tz.tz_dsttime);
-		printf("gos time test\n");
-		gettimeofday (&tv, &tz);
-		printf("tv_sec; %d\n", tv.tv_sec);
-		printf("tv_usec; %d\n", tv.tv_usec);
-		printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
-		printf("tz_dsttime, %d\n", tz.tz_dsttime);
-	}
 
 	printf("os_main is finished. Enter idle task and never return.\n");
 	idle_task(0);
