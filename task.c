@@ -114,7 +114,7 @@ int task_scheduler(void)
 		if (gtask[nextid].state & (Task_Ready|Task_Pause)) {
 			/* pick next task. */
 			gcurrtask = &(gtask[nextid]);
-			_impure_ptr = gcurrtask->reent;
+			//_impure_ptr = gcurrtask->reent;
 			//printf("Switch to task %02d.\n", gcurrtask->id);
 			break;
 		}

@@ -105,6 +105,9 @@ int idle_task(void *data)
 	printf("Setup a free running timer\n");
 	timer_init();
 
+	/* init rtc */
+	rtc_init();
+
 	printf("idle task_1\n");
 	//yield_cpu();
 	printf("idle task_2\n");
@@ -160,9 +163,6 @@ void os_main(void)
 	dst = malloc(100);
 	src = "test";
 #endif
-
-	/* init rtc */
-	rtc_init();
 
 	/* init irq mechanism. */
 	irq_init();

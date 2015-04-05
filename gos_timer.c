@@ -49,8 +49,8 @@ int timer1_init (void)
 	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8) = tmr_ctrl_val;
 
 	/* 1000000 us period timer */
-	//tmr_ctrl_val = 1000000;
-	tmr_ctrl_val = 100000000;
+	tmr_ctrl_val = 1000000;
+	//tmr_ctrl_val = 100000000;
 
 	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 0) = tmr_ctrl_val;
 
