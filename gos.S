@@ -101,8 +101,8 @@ _gos_irq_handler:
 	ldr	r10, =gcurrtask		@ load gcurrtask pointer
 	ldr	r10, [r10]		@ load task struct
 	ldr	r11, [r10]		@ load task id
-	ldr	r11, [r10, #TASK_STATE_OFFSET]		@ load task state
-	add	r12, r10, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
+	ldr	r11, [r10, #TASK_STATE_OFFSET]	@ load task state
+	add	r12, r10, #TASK_REENT_OFFSET	@ r9 point to pc of tcb
 
 	/* calc lr for task resume */
 	@cmp	r11, #1

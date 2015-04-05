@@ -18,5 +18,6 @@ void asm_defines()
 
 	OFFSET(TASK_STATE_OFFSET,task_struct,state);
 	OFFSET(TASK_TCB_OFFSET,task_struct,tcb);
+	OFFSET(TASK_REENT_OFFSET,task_struct,reent);
 }
 
