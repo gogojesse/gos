@@ -149,10 +149,10 @@ _os_timer:
 	bl	shared_isr
 
 	/* schduler should assign new task to gcurrtask. */
-	ldr	r1, =gcurrtask		@ load gcurrtask pointer
-	ldr	r1, [r1]		@ load task struct
-	ldr	r2, [r1]		@ load task id
-	add	r12, r1, #12		@ r12 point to sp of tcb
+	ldr	r1, =gcurrtask			@ load gcurrtask pointer
+	ldr	r1, [r1]			@ load task struct
+	ldr	r2, [r1]			@ load task id
+	add	r12, r1, #TASK_TCB_OFFSET	@ r12 point to sp of tcb
 
 	/* restore sp and lr. */
 	LDMFD	r12!, {sp, lr}		@ Restore sp, lr
@@ -194,10 +194,10 @@ _sys_timer:
 
 ctx_sw:
 	/* schduler should assign new task to gcurrtask. */
-	ldr	r1, =gcurrtask		@ load gcurrtask pointer
-	ldr	r1, [r1]		@ load task struct
-	ldr	r2, [r1]		@ load task id
-	add	r12, r1, #12		@ r12 point to sp of tcb
+	ldr	r1, =gcurrtask			@ load gcurrtask pointer
+	ldr	r1, [r1]			@ load task struct
+	ldr	r2, [r1]			@ load task id
+	add	r12, r1, #TASK_TCB_OFFSET	@ r12 point to sp of tcb
 
 	/* restore sp and lr. */
 	LDMFD	r12!, {sp, lr}		@ Restore sp, lr

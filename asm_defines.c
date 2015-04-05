@@ -15,5 +15,6 @@ void asm_defines()
 	DEFINE(TCB_FRAME_SIZE, sizeof(struct task_tcb));
 
 	OFFSET(TASK_STATE_OFFSET,task_struct,state);
+	OFFSET(TASK_TCB_OFFSET,task_struct,tcb);
 }
 
