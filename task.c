@@ -21,8 +21,12 @@ int init_task_struct(void)
 	/* init id. */
 	for (i = 0; i < MAX_TASK; i++, tsk++) {
 		tsk->id = i;
-		tsk->reent = &_reent_ctx[i];
-		_REENT_INIT_PTR(tsk->reent);
+		if (0 == i) {
+			tsk->reent = _impure_ptr;
+		} else {
+			tsk->reent = &_reent_ctx[i];
+			_REENT_INIT_PTR(tsk->reent);
+		}
 	}
 
 	printf("init task structure\n");
@@ -114,7 +118,7 @@ int task_scheduler(void)
 		if (gtask[nextid].state & (Task_Ready|Task_Pause)) {
 			/* pick next task. */
 			gcurrtask = &(gtask[nextid]);
-			//_impure_ptr = gcurrtask->reent;
+			_impure_ptr = gcurrtask->reent;
 			//printf("Switch to task %02d.\n", gcurrtask->id);
 			break;
 		}
