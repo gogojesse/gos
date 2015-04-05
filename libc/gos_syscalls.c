@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "sys/stat.h"
 
 #include "serial_hw/serial_hw.h"
@@ -5,6 +6,7 @@
 #include "inc/spinlock.h"
 spinlock_t spinlock_wr = spinlock_unlocked;
 spinlock_t heap_spinlock = spinlock_unlocked;
+spinlock_t malloc_lock = spinlock_unlocked;
 
 #define GOS_UART01x_DR(paddr) (*(volatile unsigned int *)(paddr))
 #define GOS_UART01x_FR(paddr) (*(((volatile unsigned int *)(paddr))+6))
@@ -44,6 +46,7 @@ caddr_t _sbrk(int incr) {
 	char *prev_heap_end;
  
         spinlock_lock(&heap_spinlock);
+
 	if (heap_end == 0) {
 		heap_end = &heap_low;
 	}
@@ -71,6 +74,20 @@ int _write(int file, char *ptr, int len) {
 	}
 
 	return len;
+}
+
+void
+__malloc_lock (ptr)
+     struct _reent *ptr;
+{
+	spinlock_lock(&malloc_lock);
+}
+
+void
+__malloc_unlock (ptr)
+     struct _reent *ptr;
+{
+	spinlock_unlock(&malloc_lock);
 }
 
 
