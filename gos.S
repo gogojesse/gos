@@ -178,11 +178,6 @@ _os_timer:
  */
 .global _sys_timer
 _sys_timer:
-	/* Switch back to IRQ Mode */
-	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
-							@ fiq disabled
-							@ irq disabled
-
 
 	/* ACK VIC to clear INTR */
 	str	r0, [r8]
@@ -203,11 +198,6 @@ ctx_sw:
 	ldr	r1, [r1]		@ load task struct
 	ldr	r2, [r1]		@ load task id
 	add	r12, r1, #12		@ r12 point to sp of tcb
-
-	setmode	SVC_MODE | PSR_F_BIT | PSR_I_BIT	@ ensure svc mode
-							@ fiq disabled
-							@ irq disabled
-
 
 	/* restore sp and lr. */
 	LDMFD	r12!, {sp, lr}		@ Restore sp, lr
