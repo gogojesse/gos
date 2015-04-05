@@ -1,7 +1,9 @@
 
 #include "inc/task.h"
 
+#ifndef offsetof
 #define offsetof __builtin_offsetof
+#endif
 
 #define DEFINE(sym, val) \
         asm volatile("\n-> " #sym " %0 " #val : : "i" (val))
