@@ -1,4 +1,6 @@
 #include <stdio.h>
+
+#include <inc/timer.h>
 #include <inc/io.h>
 
 #define TIMER_ENABLE	(1 << 7)
@@ -44,20 +46,19 @@ int timer1_init (void)
 	unsigned long	tmr_ctrl_val;
 
 	/* 1st disable the Timer */
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8);
+	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0x28);
 	tmr_ctrl_val &= ~TIMER_ENABLE;
-	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8) = tmr_ctrl_val;
+	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0x28) = tmr_ctrl_val;
 
-	/* 1000000 us period timer */
-	tmr_ctrl_val = 1000000;
-	//tmr_ctrl_val = 100000000;
+	/* set timer period timer */
+	tmr_ctrl_val = TIMER1_LOAD_VAL;
 
-	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 0) = tmr_ctrl_val;
+	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0x20) = tmr_ctrl_val;
 
-	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8);
-	tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_INT_EN | TIMER_PRS_MSK | TIMER_SIZE_MSK);
+	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0x28);
+	tmr_ctrl_val &= ~(TIMER_INT_EN);
 	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_MODE_PD);
-	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8) = tmr_ctrl_val;
+	*(volatile unsigned long *)(CONFIG_SYS_TIMERBASE + 0x28) = tmr_ctrl_val;
 
 	return 0;
 }
@@ -66,7 +67,7 @@ void timer1_curval(unsigned long * val)
 {
         void *reg;
 
-        reg = (void *) (CONFIG_SYS_TIMER1BASE + 4);
+        reg = (void *) (CONFIG_SYS_TIMERBASE + 0x24);
         *val = readl(reg);
 }
 

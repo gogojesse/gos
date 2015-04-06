@@ -59,8 +59,6 @@ void print_taskid(unsigned int taskid)
 	printf("Task ID = %d\n", taskid);
 }
 
-#define DBG_LOOP_COUNT	100000000
-
 int task01_func(void *data)
 {
 	int i = 0;
@@ -71,9 +69,8 @@ int task01_func(void *data)
 
 	while(1)
 	{
-		if ((i++ % DBG_LOOP_COUNT) == 0)
-			printf("1.\n");
-		//printf("task01_func print\n");
+		sleep(1);
+		printf("1.\n");
 	}
 
 	return 0;
@@ -89,9 +86,8 @@ int task02_func(void *data)
 
 	while (1)
 	{
-		if ((i++ % DBG_LOOP_COUNT) == 0)
-			printf("2.\n");
-		//printf("task02_func print\n");
+		sleep(1);
+		printf("2.\n");
 	}
 
 	return 0;
@@ -111,7 +107,7 @@ int idle_task(void *data)
 	{
 		buf = (char *)malloc(128);
 
-		if ((i++ % (DBG_LOOP_COUNT/100)) == 0)
+		sleep(3);
 		/* gettimeofday */
 		{
 			unsigned long i = 0;
@@ -120,6 +116,8 @@ int idle_task(void *data)
 			struct timezone tz;
 
 			buf2 = (char *)malloc(128);
+			sprintf(buf, "=================");
+			printf("%s\n", buf);
 			gettimeofday (&tv, &tz);
 			printf("tv_sec; %d\n", tv.tv_sec);
 			printf("tv_usec; %d\n", tv.tv_usec);
@@ -131,12 +129,11 @@ int idle_task(void *data)
 			printf("tv_usec; %d\n", tv.tv_usec);
 			printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
 			printf("tz_dsttime, %d\n", tz.tz_dsttime);
-
+			printf("%s\n", buf);
 			free(buf2);
 		}
 
 		free(buf);
-//		printf("idle_task print 1.\n");
 	}
 	return 0;
 }
