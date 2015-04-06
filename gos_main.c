@@ -66,7 +66,7 @@ int task01_func(void *data)
 	int i = 0;
 	spinlock_lock(&test);
 	printf("task01_1\n");
-	//yield_cpu();
+	yield_cpu();
 	printf("task01_2\n");
 
 	while(1)
@@ -83,7 +83,7 @@ int task02_func(void *data)
 {
 	int i = 0;
 	printf("task02_1\n");
-	//yield_cpu();
+	yield_cpu();
 	printf("task02_2\n");
 	spinlock_unlock(&test);
 
@@ -101,22 +101,17 @@ int idle_task(void *data)
 {
 	int i = 0;
 	char *buf;
-
-	/* Setup Timer. */
-	printf("Setup a free running timer\n");
-	timer_init();
-
-	/* init rtc */
-	rtc_init();
+	char *buf2;
 
 	printf("idle task_1\n");
-	//yield_cpu();
+	yield_cpu();
 	printf("idle task_2\n");
+
 	while(1)
 	{
 		buf = (char *)malloc(128);
 
-		if ((i++ % DBG_LOOP_COUNT) == 0)
+		if ((i++ % (DBG_LOOP_COUNT/100)) == 0)
 		/* gettimeofday */
 		{
 			unsigned long i = 0;
@@ -124,6 +119,7 @@ int idle_task(void *data)
 			struct timeval tv;
 			struct timezone tz;
 
+			buf2 = (char *)malloc(128);
 			gettimeofday (&tv, &tz);
 			printf("tv_sec; %d\n", tv.tv_sec);
 			printf("tv_usec; %d\n", tv.tv_usec);
@@ -135,6 +131,8 @@ int idle_task(void *data)
 			printf("tv_usec; %d\n", tv.tv_usec);
 			printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
 			printf("tz_dsttime, %d\n", tz.tz_dsttime);
+
+			free(buf2);
 		}
 
 		free(buf);
@@ -193,6 +191,13 @@ void os_main(void)
 	/* set up a isr for HW timer 2. */
 	timer1_init();
 	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
+
+	/* Setup System Timer. */
+	printf("Setup a free running timer\n");
+	timer_init();
+
+	/* init rtc */
+	rtc_init();
 
 	printf("os_main is finished. Enter idle task and never return.\n");
 	idle_task(0);
