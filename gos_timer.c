@@ -1,4 +1,6 @@
 #include <stdio.h>
+
+#include <inc/timer.h>
 #include <inc/io.h>
 
 #define TIMER_ENABLE	(1 << 7)
@@ -48,9 +50,8 @@ int timer1_init (void)
 	tmr_ctrl_val &= ~TIMER_ENABLE;
 	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8) = tmr_ctrl_val;
 
-	/* 1000000 us period timer */
-	tmr_ctrl_val = 1000000;
-	//tmr_ctrl_val = 100000000;
+	/* set timer period timer */
+	tmr_ctrl_val = TIMER1_LOAD_VAL;
 
 	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 0) = tmr_ctrl_val;
 
