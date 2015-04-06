@@ -56,7 +56,7 @@ int timer1_init (void)
 
 	tmr_ctrl_val = *(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8);
 	tmr_ctrl_val &= ~(TIMER_MODE_MSK | TIMER_INT_EN | TIMER_PRS_MSK | TIMER_SIZE_MSK);
-	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_ONE_SHT | TIMER_MODE_PD);
+	tmr_ctrl_val |= (TIMER_ENABLE | TIMER_MODE_PD);
 	*(volatile unsigned long *)(CONFIG_SYS_TIMER1BASE + 8) = tmr_ctrl_val;
 
 	return 0;
