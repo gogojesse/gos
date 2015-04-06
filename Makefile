@@ -4,6 +4,7 @@ LD ?= arm-eabi-ld
 gos_objs = gos.o \
 	gos_main.o \
 	irq.o \
+	rtc.o \
 	time.o \
 	gos_vsprintf.o \
 	gos_timer.o \

@@ -41,7 +41,7 @@ void shared_isr(void) /* In IRQ mode, called if IRQ is shared. */
 	unsigned int val;
 	void *reg;
 	
-	printf("Enter shared_isr()\n");
+	//printf("Enter shared_isr()\n");
 
 	/* 1. check IRQ. */
 	reg = (void*)VIC_REGBASE;

@@ -101,11 +101,12 @@ _gos_irq_handler:
 	ldr	r10, =gcurrtask		@ load gcurrtask pointer
 	ldr	r10, [r10]		@ load task struct
 	ldr	r11, [r10]		@ load task id
-	ldr	r11, [r10, #TASK_STATE_OFFSET]		@ load task state
-	add	r12, r10, #TASK_STRUCT_SIZE	@ r9 point to pc of tcb
+	ldr	r11, [r10, #TASK_STATE_OFFSET]	@ load task state
+	add	r12, r10, #TASK_REENT_OFFSET	@ r9 point to pc of tcb
 
 	/* calc lr for task resume */
-	cmp	r11, #1
+	@cmp	r11, #1
+	@sub	lr, lr, #8		@ Adjust the return address
 	sub	lr, lr, #4		@ Adjust the return address
 
 	/* Save current context. Please refer to inc/task.h */
@@ -148,10 +149,10 @@ _os_timer:
 	bl	shared_isr
 
 	/* schduler should assign new task to gcurrtask. */
-	ldr	r1, =gcurrtask		@ load gcurrtask pointer
-	ldr	r1, [r1]		@ load task struct
-	ldr	r2, [r1]		@ load task id
-	add	r12, r1, #12		@ r12 point to sp of tcb
+	ldr	r1, =gcurrtask			@ load gcurrtask pointer
+	ldr	r1, [r1]			@ load task struct
+	ldr	r2, [r1]			@ load task id
+	add	r12, r1, #TASK_TCB_OFFSET	@ r12 point to sp of tcb
 
 	/* restore sp and lr. */
 	LDMFD	r12!, {sp, lr}		@ Restore sp, lr
@@ -172,6 +173,9 @@ _os_timer:
 
 	b	finished
 
+/*
+ * Enter this routine under SVC Mode with FIQ and IRQ disabled.
+ */
 .global _sys_timer
 _sys_timer:
 
@@ -181,15 +185,6 @@ _sys_timer:
 	/* Disable system timer to avoid reentrance. */
 	bl	timer0_clear_int
 
-	/* switch to svc mode before we get sp, lr of current task. */
-	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
-							@ fiq disabled
-							@ irq disabled
-
-	/* Save SVC sp.  */
-	stmfd	r12!, {lr}		@ Store lr
-	stmfd	r12!, {sp}		@ Store sp
-
 	/* We've stored all context of current task. */
 	/* Run scheduler to pick up next task. */
 	bl	task_scheduler
@@ -197,11 +192,12 @@ _sys_timer:
 	/* Re-enable the system timer */
 	bl	timer0_enable
 
+ctx_sw:
 	/* schduler should assign new task to gcurrtask. */
-	ldr	r1, =gcurrtask		@ load gcurrtask pointer
-	ldr	r1, [r1]		@ load task struct
-	ldr	r2, [r1]		@ load task id
-	add	r12, r1, #12		@ r12 point to sp of tcb
+	ldr	r1, =gcurrtask			@ load gcurrtask pointer
+	ldr	r1, [r1]			@ load task struct
+	ldr	r2, [r1]			@ load task id
+	add	r12, r1, #TASK_TCB_OFFSET	@ r12 point to sp of tcb
 
 	/* restore sp and lr. */
 	LDMFD	r12!, {sp, lr}		@ Restore sp, lr

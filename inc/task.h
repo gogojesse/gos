@@ -1,6 +1,8 @@
 #ifndef _task_h_
 #define _task_h_
 
+#include <sys/reent.h>
+
 typedef int taskid;
 typedef unsigned int cpureg;
 typedef int (*task_func)(void *data); 
@@ -39,6 +41,7 @@ struct task_struct {
 	unsigned int stacksize; /* stack size          4 */
 	taskstate state;	/* task state          8 */
 	struct task_tcb tcb;	/* task control block 12 */
+	struct _reent *reent;
 };
 
 //#define MAX_TASK	10
