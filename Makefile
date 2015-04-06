@@ -10,7 +10,8 @@ gos_objs = gos.o \
 	gos_timer.o \
 	task.o \
 	spinlock.o \
-	./libc/gos_syscalls.o
+	libc/gos_unistd.o \
+	libc/gos_syscalls.o
 
 gos_cpu_flags = -mcpu=arm926ej-s -g
 #gos_cpu_flags = -mcpu=cortex-a8 -g
