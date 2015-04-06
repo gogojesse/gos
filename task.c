@@ -148,7 +148,7 @@ void yield_cpu(void)
              "stmfd sp!, {r0-r2}\n\t"
              "stmfd sp!, {r3-r7}\n\t"
              "stmfd sp!, {r8-r12}\n\t"
-             "mrs r0, spsr\n\t"
+             "mrs r0, cpsr\n\t"
              /* Check current task ID */
              "ldr     r8, =gcurrtask\n\t"
              "ldr     r7, [r8]\n\t"
