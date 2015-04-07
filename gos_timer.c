@@ -41,7 +41,7 @@ int timer_init (void)
 	return 0;
 }
 
-int timer1_init (void)
+int us_timer_init (void)
 {
 	unsigned long	tmr_ctrl_val;
 
@@ -63,7 +63,7 @@ int timer1_init (void)
 	return 0;
 }
 
-void timer1_curval(unsigned long * val)
+void us_timer_curval(unsigned long * val)
 {
         void *reg;
 
