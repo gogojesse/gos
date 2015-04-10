@@ -1,5 +1,5 @@
 /* some definition and macro reference Linux Kernel Source. */
-#include "serial_hw/gos_serial_hw.inc"
+#include "serial_hw/serial_hw.inc"
 #include "inc/asm_defines.h"
 
 .macro	setmode, mode
@@ -10,7 +10,7 @@
 	addruart	\rx, \tmp1
 .endm
 
-#include "./init/gos_exception_handler.S"
+#include "./init/exception_handler.S"
 
 .global    gcurrtask
 
