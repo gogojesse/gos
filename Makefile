@@ -4,8 +4,12 @@ LD ?= arm-eabi-ld
 gos_objs = gos.o \
 	gos_main.o \
 	irq.o \
+	vic.o \
 	rtc.o \
 	time.o \
+	app.o \
+	isr.o \
+	idle_task.o \
 	gos_vsprintf.o \
 	gos_timer.o \
 	task.o \
