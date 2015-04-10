@@ -99,8 +99,8 @@ void os_main(void)
 	rtc_init();
 
 	/* set up a isr for HW timer 2. */
-	timer1_init();
-	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
+	//timer1_init();
+	//irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
 
 	/* Setup System Timer. */
 	timer_init();

@@ -1,8 +1,8 @@
 SECTIONS {
 	. = 0x0;
 	.text : {
-		gos.o
-		/* gos_main.o */
+		startup.o
+		/* main.o */
 		*(.text);
 	}
 	.data : { * (.data); }
