@@ -101,6 +101,11 @@ int task_scheduler(void)
 	taskid nextid;
 
 	/*
+	 * 0. Clear systeim timer.
+	 */
+	timer0_clear_int();
+
+	/*
 	 * 1. Update current task state.
 	 *    tcb was store in handler already.
 	 */
@@ -127,6 +132,9 @@ int task_scheduler(void)
 context_switch:
 	/* context switch to new task.*/
 	gcurrtask->state = Task_Running;
+
+	/* Re-enable system timer. */
+	timer0_enable();
 
 	return 0;
 }

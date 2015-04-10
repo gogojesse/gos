@@ -108,7 +108,7 @@ void us_timer_curval(unsigned long * val)
 extern void _gos_irq_handler(void);
 extern void _gos_irq02_handler(void);
 extern void _sys_timer(void);
-extern void _os_timer(void);
+extern void _os_isr(void);
 
 void timer0_enable(void)
 {
@@ -200,7 +200,7 @@ void vic_init2(void *base)
         writel(_sys_timer, reg);
 
 	reg = base + VIC_VECT_ADDR0 + (5 * 4);
-        writel(_os_timer, reg);
+        writel(_os_isr, reg);
 
 	/* Enable irq 4 for Timer 0 and 1 */
 	/* Enable irq 5 for Timer 2 and 3 */
