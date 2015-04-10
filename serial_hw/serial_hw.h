@@ -1,5 +1,5 @@
-#ifndef __gos_serial_hw_h_
-#define __gos_serial_hw_h_
+#ifndef _serial_hw_h_
+#define _serial_hw_h_
 
 #define	UART01x_ADDR		0x101f1000
 #define UART01x_DR              0x000

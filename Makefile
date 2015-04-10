@@ -1,8 +1,8 @@
 CC ?= arm-eabi-gcc
 LD ?= arm-eabi-ld
 
-gos_objs = gos.o \
-	gos_main.o \
+gos_objs = startup.o \
+	main.o \
 	irq.o \
 	vic.o \
 	rtc.o \
@@ -10,12 +10,11 @@ gos_objs = gos.o \
 	app.o \
 	isr.o \
 	idle_task.o \
-	gos_vsprintf.o \
-	gos_timer.o \
+	timer.o \
 	task.o \
 	spinlock.o \
-	libc/gos_unistd.o \
-	libc/gos_syscalls.o
+	libc/unistd.o \
+	libc/syscalls.o
 
 gos_cpu_flags = -mcpu=arm926ej-s -g
 #gos_cpu_flags = -mcpu=cortex-a8 -g
@@ -23,7 +22,7 @@ gos_cpu_flags = -mcpu=arm926ej-s -g
 NewLibc = ./libc/libc.a
 INC_DIR = ./libc/include
 
-linkscript = gos.lds
+linkscript = startup.lds
 gos_img = gos.elf
 
 all:	./inc/asm_defines.h $(gos_objs)
@@ -39,5 +38,5 @@ all:	./inc/asm_defines.h $(gos_objs)
 	$(CC) $(gos_cpu_flags) -I./ -I$(INC_DIR) -c $< -o $*.o
 
 clean: 
-	rm $(gos_img) $(gos_objs) inc/asm_defines.h
+	rm -f $(gos_img) $(gos_objs) inc/asm_defines.h
 
