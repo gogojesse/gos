@@ -137,7 +137,7 @@ int idle_task(void *data)
 static int ddd = 0;
 int os_timer_isr(IRQ_RESOURCE res) /* called in IRQ mode. */
 {
-	printf("os_timer_isr() %d\n", ddd++);
+	//printf("os_timer_isr() %d\n", ddd++);
 	timer1_clear_int();
 	timer1_enable();
 
@@ -181,20 +181,17 @@ void os_main(void)
 	/* init irq mechanism. */
 	irq_init();
 
-	/* set up us timer */
+	/* set up time. (ustimer+RTC) */
 	us_timer_init();
+	rtc_init();
 
 	/* set up a isr for HW timer 2. */
 	timer1_init();
 	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
 
 	/* Setup System Timer. */
-	printf("Setup a free running timer\n");
 	timer_init();
 
-	/* init rtc */
-	rtc_init();
-
-	printf("os_main is finished. Enter idle task and never return.\n");
+	/* os_main is finished. Enter idle task and never return. */
 	idle_task(0);
 }
