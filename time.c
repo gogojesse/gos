@@ -9,7 +9,7 @@ int _gettimeofday( struct timeval *tv, void *tzvp )
 	unsigned long t = 0;
 
 	rtc_read(&sec);
-	timer1_curval(&us);
+	us_timer_curval(&us);
 	t = (sec * 1000000) + (TIMER1_LOAD_VAL - us);  // timer1 decrease to 0, get uptime in us
 	tv->tv_sec = t / 1000000;  // convert to seconds
 	tv->tv_usec = ( t % 1000000 ) ;  // get remaining microseconds

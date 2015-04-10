@@ -18,10 +18,6 @@ extern void gos_printf(const char* format, ...);
 spinlock_t test = spinlock_locked;
 static unsigned int gos_cpu_info = 0x0;
 
-extern int timer_init (void);
-extern int timer1_init (void);
-extern void vic_init2(void *base);
-
 void print_cpuinfo(void)
 {
 #define L1_DCache	(1 << 2)
@@ -184,6 +180,9 @@ void os_main(void)
 
 	/* init irq mechanism. */
 	irq_init();
+
+	/* set up us timer */
+	us_timer_init();
 
 	/* set up a isr for HW timer 2. */
 	timer1_init();
