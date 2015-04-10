@@ -87,6 +87,34 @@ out2:
 	bl	printch 
 	b	finished
 
+.macro	_ctx_sw_bh
+	/* schduler should assign new task to gcurrtask. */
+	ldr	r1, =gcurrtask			@ load gcurrtask pointer
+	ldr	r1, [r1]			@ load task struct
+	ldr	r2, [r1]			@ load task id
+	add	r12, r1, #TASK_TCB_OFFSET	@ r12 point to sp of tcb
+
+	/* restore sp and lr. */
+	LDMFD	r12!, {sp, lr}		@ Restore sp, lr
+
+	/* Switch back to IRQ Mode */
+	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
+							@ fiq disabled
+							@ irq disabled
+
+	/* restore spsr */
+	LDMFD	r12!, {r11}
+	MSR	SPSR_csxf, r11
+
+	mov	lr, r12
+
+	/* restore. r0~r12, pc, should never return. */
+	LDMFD	lr!, {r0-r12, pc}^	@ Restore r0~r12, pc
+
+	b	finished
+.endm
+
+
 .global _gos_irq_handler
 _gos_irq_handler:
 
@@ -140,38 +168,15 @@ load_isr_vec:
 
 	b	finished
 
-.global _os_timer
-_os_timer:
+.global _os_isr
+_os_isr:
 
 	/* ACK VIC to clear INTR */
 	str	r0, [r8]
 
 	bl	shared_isr
 
-	/* schduler should assign new task to gcurrtask. */
-	ldr	r1, =gcurrtask			@ load gcurrtask pointer
-	ldr	r1, [r1]			@ load task struct
-	ldr	r2, [r1]			@ load task id
-	add	r12, r1, #TASK_TCB_OFFSET	@ r12 point to sp of tcb
-
-	/* restore sp and lr. */
-	LDMFD	r12!, {sp, lr}		@ Restore sp, lr
-
-	/* Switch back to IRQ Mode */
-	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
-							@ fiq disabled
-							@ irq disabled
-
-	/* restore spsr */
-	LDMFD	r12!, {r11}
-	MSR	SPSR_csxf, r11
-
-	mov	lr, r12
-
-	/* restore. r0~r12, pc, should never return. */
-	LDMFD	lr!, {r0-r12, pc}^	@ Restore r0~r12, pc
-
-	b	finished
+	_ctx_sw_bh
 
 /*
  * Enter this routine under SVC Mode with FIQ and IRQ disabled.
@@ -182,41 +187,11 @@ _sys_timer:
 	/* ACK VIC to clear INTR */
 	str	r0, [r8]
 
-	/* Disable system timer to avoid reentrance. */
-	bl	timer0_clear_int
-
 	/* We've stored all context of current task. */
 	/* Run scheduler to pick up next task. */
 	bl	task_scheduler
 
-	/* Re-enable the system timer */
-	bl	timer0_enable
-
-ctx_sw:
-	/* schduler should assign new task to gcurrtask. */
-	ldr	r1, =gcurrtask			@ load gcurrtask pointer
-	ldr	r1, [r1]			@ load task struct
-	ldr	r2, [r1]			@ load task id
-	add	r12, r1, #TASK_TCB_OFFSET	@ r12 point to sp of tcb
-
-	/* restore sp and lr. */
-	LDMFD	r12!, {sp, lr}		@ Restore sp, lr
-
-	/* Switch back to IRQ Mode */
-	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT	@ switch irq mode
-							@ fiq disabled
-							@ irq disabled
-
-	/* restore spsr */
-	LDMFD	r12!, {r11}
-	MSR	SPSR_csxf, r11
-
-	mov	lr, r12
-
-	/* restore. r0~r12, pc, should never return. */
-	LDMFD	lr!, {r0-r12, pc}^	@ Restore r0~r12, pc
-
-	b	finished
+	_ctx_sw_bh
 
 .global _gos_irq02_handler
 _gos_irq02_handler:

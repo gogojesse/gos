@@ -1,5 +1,3 @@
-extern void gos_printf(const char* format, ...);
-
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -8,14 +6,12 @@ extern void gos_printf(const char* format, ...);
 #include <sys/time.h>
 
 #include "inc/task.h"
-#include "inc/spinlock.h"
 #include "inc/platform-defs.h"
 #include "inc/timer.h"
 #include "inc/irq.h"
 #include "inc/rtc.h"
-#include "inc/io.h"
+//#include "inc/io.h"
 
-spinlock_t test = spinlock_locked;
 static unsigned int gos_cpu_info = 0x0;
 
 void print_cpuinfo(void)
@@ -55,94 +51,11 @@ void print_taskid(unsigned int taskid)
 	printf("Task ID = %d\n", taskid);
 }
 
-int task01_func(void *data)
-{
-	int i = 0;
-	spinlock_lock(&test);
-	printf("task01_1\n");
-	yield_cpu();
-	printf("task01_2\n");
-
-	while(1)
-	{
-		sleep(1);
-		printf("1.\n");
-	}
-
-	return 0;
-}
-
-int task02_func(void *data)
-{
-	int i = 0;
-	printf("task02_1\n");
-	yield_cpu();
-	printf("task02_2\n");
-	spinlock_unlock(&test);
-
-	while (1)
-	{
-		sleep(1);
-		printf("2.\n");
-	}
-
-	return 0;
-}
-
-int idle_task(void *data)
-{
-	int i = 0;
-	char *buf;
-	char *buf2;
-
-	printf("idle task_1\n");
-	yield_cpu();
-	printf("idle task_2\n");
-
-	while(1)
-	{
-		buf = (char *)malloc(128);
-
-		sleep(3);
-		/* gettimeofday */
-		{
-			unsigned long i = 0;
-
-			struct timeval tv;
-			struct timezone tz;
-
-			buf2 = (char *)malloc(128);
-			sprintf(buf, "=================");
-			printf("%s\n", buf);
-			gettimeofday (&tv, &tz);
-			printf("tv_sec; %d\n", tv.tv_sec);
-			printf("tv_usec; %d\n", tv.tv_usec);
-			printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
-			printf("tz_dsttime, %d\n", tz.tz_dsttime);
-			printf("gos time test\n");
-			gettimeofday (&tv, &tz);
-			printf("tv_sec; %d\n", tv.tv_sec);
-			printf("tv_usec; %d\n", tv.tv_usec);
-			printf("tz_minuteswest; %d\n", tz.tz_minuteswest);
-			printf("tz_dsttime, %d\n", tz.tz_dsttime);
-			printf("%s\n", buf);
-			free(buf2);
-		}
-
-		free(buf);
-	}
-	return 0;
-}
-
-static int ddd = 0;
-int os_timer_isr(IRQ_RESOURCE res) /* called in IRQ mode. */
-{
-	printf("os_timer_isr() %d\n", ddd++);
-	timer1_clear_int();
-	timer1_enable();
-
-	return 0;
-}
+/* tasks and ISR declaration. */
+extern int task01_func(void *data);
+extern int task02_func(void *data);
+extern int idle_task(void *data);
+extern int os_timer_isr(IRQ_RESOURCE res);
 
 void os_main(void)
 {
@@ -181,20 +94,17 @@ void os_main(void)
 	/* init irq mechanism. */
 	irq_init();
 
-	/* set up us timer */
+	/* set up time. (ustimer+RTC) */
 	us_timer_init();
+	rtc_init();
 
 	/* set up a isr for HW timer 2. */
 	timer1_init();
 	irq_reg(5, os_timer_isr, 0, SHARED_IRQ); 
 
 	/* Setup System Timer. */
-	printf("Setup a free running timer\n");
 	timer_init();
 
-	/* init rtc */
-	rtc_init();
-
-	printf("os_main is finished. Enter idle task and never return.\n");
+	/* os_main is finished. Enter idle task and never return. */
 	idle_task(0);
 }
