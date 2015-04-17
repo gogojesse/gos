@@ -157,6 +157,7 @@ void yield_cpu(void)
              "stmfd sp!, {r3-r7}\n\t"
              "stmfd sp!, {r8-r12}\n\t"
              "mrs r0, cpsr\n\t"
+             "msr cpsr_c, 0b11010011\n\t"	/* switch to SVC Mode. */
              /* Check current task ID */
              "ldr     r8, =gcurrtask\n\t"
              "ldr     r7, [r8]\n\t"
