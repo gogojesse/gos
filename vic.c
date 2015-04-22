@@ -14,8 +14,8 @@
 #define VIC_VECTADDR			0x030
 #define VIC_PL190_DEF_VECT_ADDR		0x034
 
-/* handlers in gos.S */
-extern void _gos_irq_handler(void);
+/* handlers in startup.S */
+extern void _os_irq_handler(void);
 extern void _sys_timer(void);
 extern void _os_isr(void);
 
@@ -46,7 +46,7 @@ void vic_init2(void *base)
 
 	/* set up default vector address. */
 	reg = base + VIC_PL190_DEF_VECT_ADDR;
-        writel(_gos_irq_handler, reg);
+        writel(_os_irq_handler, reg);
 
 	/*
 	 * HW Timer 0 is for system timer(scheduler).

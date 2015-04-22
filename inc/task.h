@@ -44,8 +44,7 @@ struct task_struct {
 	struct _reent *reent;
 };
 
-//#define MAX_TASK	10
-#define MAX_TASK	3
+#define MAX_TASK	10
 
 int init_task_struct(void);
 taskid task_create(unsigned int stacksize, task_func func); 

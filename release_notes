@@ -1,0 +1,21 @@
+Release V1.0               April, 22, 2015
+==========================================
+## Current Status
+    1. Works on Versatilepb board on QEMU.
+    2. Support 10 tasks context included idle task.
+    3. Round-Robin Scheduler
+    4. Spinlock Supported.
+    5. CPU Yielding Supported.
+    6. malloc/free Supported.
+    7. printf Supported.
+    8. No file system yet.
+    9. No device driver interface yet.
+   10. open, close, read, write function are all bound with UART for printf.
+   11. All tasks run on SVC mode. OS only supports SVC and IRQ mode.
+
+## Next Step
+    1. Device Interfaces
+    2. File System
+    3. Port to real board.
+
+

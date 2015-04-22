@@ -27,15 +27,15 @@
 #define PSR_F_BIT	(1 << 6)
 #define PSR_I_BIT	(1 << 7)
 
-_gos_reset_handler:
+_os_reset_handler:
 main:
 	setmode	SVC_MODE | PSR_F_BIT | PSR_I_BIT     @ ensure svc mode
 						     @ and irqs disabled
-	ldr	sp, =_gos_stack_end
+	ldr	sp, =_os_stack_end
 
 	setmode	IRQ_MODE | PSR_F_BIT | PSR_I_BIT     @ switch irq mode
 						     @ and irqs disabled
-	ldr	sp, =_gos_irq_stack_end
+	ldr	sp, =_os_irq_stack_end
 
 	setmode	SVC_MODE                            @ back to svc mode
 						     @ with fiq&irqs enabled
@@ -58,13 +58,13 @@ out:
 	bl	printch 
 
 	/* 3) Setup stack point before calling C. */
-	ldr	sp, =_gos_stack_end
+	ldr	sp, =_os_stack_end
 	bl	os_main
 
 finished:
 	b	.
 
-_gos_undfd_handler:
+_os_undfd_handler:
 	mov	r0, #'\n'
 	bl	printch 
 
@@ -115,8 +115,8 @@ out2:
 .endm
 
 
-.global _gos_irq_handler
-_gos_irq_handler:
+.global _os_irq_handler
+_os_irq_handler:
 
 	/* Save partial context to irq_sp temporarily. */
 	stmfd sp!, {r9-r10}	/* store r9~r10 to irq_sp */	
@@ -193,30 +193,7 @@ _sys_timer:
 
 	_ctx_sw_bh
 
-.global _gos_irq02_handler
-_gos_irq02_handler:
-	mov	r0, #'\n'
-	bl	printch 
-
-	/* print error message. */
-	mov	r4, #irq02_string
-	mov	r5, #(_str_4end - _str_4start)
-	mov	r6, #0
-
-loop3:
-	ldrb	r0, [r4]
-	bl	printch 
-	add	r6, r6, #1
-	cmp	r6, r5
-	beq	out2
-	add	r4, r4, #1
-	b	loop2
-out3:
-
-	mov	r0, #'\n'
-	bl	printch 
-	b	finished
-
+/* For print out debugging. */
 .global printascii
 printascii:
 		addruart_current r3, r1, r2
@@ -240,8 +217,7 @@ printch:
 		mov	r0, #0
 		b	1b
 
-
-
+/* Define msg for some exception. */
 OS_Msg:
 _str_start:
 	.string	"GOS Booting..."
@@ -252,16 +228,4 @@ undfd_instr:
 _str_2start:
 	.string	"undefined instruction"
 _str_2end:
-
-.align 2
-irq_string:
-_str_3start:
-	.string	"irq interrupt"
-_str_3end:
-
-.align 2
-irq02_string:
-_str_4start:
-	.string	"irq 02 interrupt"
-_str_4end:
 

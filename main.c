@@ -12,7 +12,7 @@
 #include "inc/rtc.h"
 //#include "inc/io.h"
 
-static unsigned int gos_cpu_info = 0x0;
+static unsigned int os_cpu_info = 0x0;
 
 void print_cpuinfo(void)
 {
@@ -22,24 +22,24 @@ void print_cpuinfo(void)
 	asm (
 		"MRC p15, 0, r0, c1, c0, 0\n\t"
 		"mov %[result], r0"
-			: [result] "=r" (gos_cpu_info)
+			: [result] "=r" (os_cpu_info)
 	);
 
-	printf("\nCurrent CPU Cache Setting : 0x%08x\n", gos_cpu_info);
+	printf("\nCurrent CPU Cache Setting : 0x%08x\n", os_cpu_info);
 	printf("------------------------------------------\n");
-	printf("L1 Instruction Cache      : %s\n", (gos_cpu_info & L1_ICache) ? "On":"Off");
-	printf("L1 Data        Cache      : %s\n", (gos_cpu_info & L1_DCache) ? "On":"Off");
+	printf("L1 Instruction Cache      : %s\n", (os_cpu_info & L1_ICache) ? "On":"Off");
+	printf("L1 Data        Cache      : %s\n", (os_cpu_info & L1_DCache) ? "On":"Off");
 
 	printf("\n");
 }
 
-int gos_enable_idcache(void)
+int os_enable_idcache(void)
 {
-	gos_cpu_info |= L1_DCache|L1_ICache;
+	os_cpu_info |= L1_DCache|L1_ICache;
 
 	printf("Enable ICache and DCache\n");
 	asm (
-		"MCR p15, 0, %[value], c1, c0, 0\n\t" : : [value] "r" (gos_cpu_info) :
+		"MCR p15, 0, %[value], c1, c0, 0\n\t" : : [value] "r" (os_cpu_info) :
 	);
 
 
@@ -68,7 +68,7 @@ void os_main(void)
 	print_cpuinfo();
 
 	/* Enable i&d cache. */
-	gos_enable_idcache();
+	os_enable_idcache();
 	print_cpuinfo();
 
 	/* Initialize the task structures. */
