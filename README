@@ -7,10 +7,28 @@ Build
 
 How to load your OS
 -------------------
+0) Toolchain Setting
+
+   # Download arm toolchain (compiler, assembler and linker)
+   $ mkdir -p /toolchains;cd /toolchains/
+
+   # Linux
+   $ wget https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-linux.tar.bz2
+
+   # MacOS
+   $ wget https://launchpad.net/gcc-arm-embedded/4.8/4.8-2014-q3-update/+download/gcc-arm-none-eabi-4_8-2014q3-20140805-mac.tar.bz2 --no-check-certificate
+
+   # Extract to /toolchains
+   $ tar jxvf *.tar.bz2
+
+   # Export PATH and Environment Variables
+   $ export PATH=$PATH:/toolchains/gcc-arm-none-eabi-4_8-2014q3/bin
+
 1) Prepare QEMU
 
    $ git clone git://git.qemu-project.org/qemu.git
    $ cd qemu
+   $ git submodule update --init dtc
    $ ./configure --prefix=/home/gogojesse/projects/qemu_bin --target-list=arm-softmmu,arm-linux-user --enable-debug
    $ make -s
    $ make install -s
@@ -18,6 +36,33 @@ How to load your OS
 2) Run Qemu
 
    $ ./qemu-system-arm -M versatilepb -nographic -kernel ./os.elf
+
+How to Debug
+------------
+1) In console "A", execute qemu in GDB mode with our simpleos.elf
+
+   # option "-S -s" will force qemu wait for gdb connect to itself.
+   # gdb default uses port 1234
+   $ ./qemu-system-arm -M versatilepb -nographic -kernel ./os.elf -S -s
+
+    # ctrl+a z to exit from qemu
+
+2) In console "B", execute gdb to connect to QEMU. (like HW ICE)
+
+   # launch gdb
+   $ arm-none-eabi-gdb
+
+   # after gdb launched. in gdb console.
+   (gdb) file os.elf			# load symbol
+   (gdb) target remote localhost:1234	# connect to qemu
+   (gdb) layout asm			# show asm code window and point
+					# out where code pc point to.
+   (gdb) stepi				# execute one asm line
+   (gdb) p $r0				# r0 = 0
+   (gdb) stepi
+   (gdb) p $r0				# r0 = 1
+   (gdb) stepi				# code will spin at 0x8 forever.
+   (gdb) quit				# ctrl+a z to exit from qemu
 
 Clean
 -----
