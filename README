@@ -17,7 +17,7 @@ How to load your OS
 
 2) Run Qemu
 
-   $ ./qemu-system-arm -M versatilepb -nographic -kernel ./gos.elf
+   $ ./qemu-system-arm -M versatilepb -nographic -kernel ./os.elf
 
 Clean
 -----
