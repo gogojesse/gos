@@ -41,10 +41,19 @@
 
 /* Print Rountine. */
 	.macro	addruart, rp, rv, tmp
+
+#if 0
 		mov	\rp,      #0x001F0000
 		orr	\rp, \rp, #0x00001000
 		orr	\rv, \rp, #0xf1000000	@ virtual base
-		orr	\rp, \rp,  #0x10000000	@ physical base
+		orr	\rp, \rp, #0x10000000	@ physical base
+#else
+		mov	\rp,      #0x00200000
+		orr	\rp, \rp, #0x00001000
+		orr	\rv, \rp, #0x00000000	@ virtual base
+		orr	\rp, \rp, #0x20000000	@ physical base
+#endif
+
 		.endm
 
                 .macro  senduart,rd,rx
