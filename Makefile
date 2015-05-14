@@ -1,5 +1,6 @@
 CC ?= arm-eabi-gcc
 LD ?= arm-eabi-ld
+OBJCOPY ?= arm-eabi-objcopy
 
 os_objs = startup.o \
 	main.o \
@@ -24,9 +25,11 @@ INC_DIR = ./libc/include
 
 linkscript = startup.lds
 os_img = os.elf
+os_bin = os.bin
 
 all:	./inc/asm_defines.h $(os_objs)
 	$(LD) -T $(linkscript) -o $(os_img) $(os_objs) $(NewLibc) $(ToolChainLib)
+	$(OBJCOPY) -O binary $(os_img) $(os_bin)
 
 ./inc/asm_defines.h: asm_defines.c inc/task.h
 	$(CC) $(os_cpu_flags) -S $< -o - | sed 's/#//g' | awk '($$1 == "->") { print "#define " $$2 " " $$3 }' > $@
@@ -38,5 +41,5 @@ all:	./inc/asm_defines.h $(os_objs)
 	$(CC) $(os_cpu_flags) -I./ -I$(INC_DIR) -c $< -o $*.o
 
 clean: 
-	rm -f $(os_img) $(os_objs) inc/asm_defines.h
+	rm -f $(os_bin) $(os_img) $(os_objs) inc/asm_defines.h
 
