@@ -10,8 +10,12 @@
 	addruart	\rx, \tmp1
 .endm
 
+/*
+ * OS Exception Handlers.
+ */
 #include "./init/exception_handler.S"
 
+/* Extern Global Variables. */
 .global    gcurrtask
 
 /*

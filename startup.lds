@@ -1,7 +1,12 @@
 SECTIONS {
 	. = 0x0;
+	._os_vector_start : {
+		* (._os_vector_start);
+	}
+	. = 0x8000;
 	.text : {
 		startup.o
+		vic.o
 		/* main.o */
 		*(.text);
 	}
